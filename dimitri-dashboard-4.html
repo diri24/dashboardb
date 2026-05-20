@@ -1,0 +1,2524 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DIMITRI // DASHBOARD</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --surface: #111111;
+    --surface2: #181818;
+    --border: #222222;
+    --accent: #e8ff00;
+    --accent2: #ff3c00;
+    --text: #f0f0f0;
+    --muted: #555;
+    --success: #00e676;
+    --warn: #ff9100;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: 
+      repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(255,255,255,0.012) 40px, rgba(255,255,255,0.012) 41px),
+      repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(255,255,255,0.012) 40px, rgba(255,255,255,0.012) 41px);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* HEADER */
+  header {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 32px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(10,10,10,0.95);
+    backdrop-filter: blur(10px);
+    position: sticky;
+    top: 0;
+  }
+
+  .logo {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 2rem;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+  }
+
+  .logo span { color: var(--muted); font-size: 0.9rem; display: block; font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.3em; margin-top: -4px; }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .date-time {
+    text-align: right;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .streak-badge {
+    background: var(--accent);
+    color: #000;
+    font-family: 'Bebas Neue', cursive;
+    font-size: 1.1rem;
+    padding: 6px 14px;
+    letter-spacing: 0.1em;
+  }
+
+  /* NAV TABS */
+  .nav-tabs {
+    display: flex;
+    gap: 0;
+    padding: 0 32px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    position: relative;
+    z-index: 9;
+    overflow-x: auto;
+  }
+
+  .nav-tab {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 14px 22px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    white-space: nowrap;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+  }
+
+  .nav-tab:hover { color: var(--text); }
+  .nav-tab.active { color: var(--accent); border-bottom: 2px solid var(--accent); }
+
+  /* MAIN LAYOUT */
+  main {
+    position: relative;
+    z-index: 1;
+    padding: 28px 32px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* GRID */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+
+  /* CARD */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 22px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+
+  .card:hover { border-color: #333; }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px;
+    height: 100%;
+    background: var(--accent);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .card:hover::before { opacity: 1; }
+
+  .card-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+
+  .card-value {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 2.8rem;
+    line-height: 1;
+    color: var(--text);
+  }
+
+  .card-sub {
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+
+  .card-title {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 1.1rem;
+    letter-spacing: 0.08em;
+    margin-bottom: 14px;
+    color: var(--accent);
+  }
+
+  /* SECTION HEADER */
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .section-title {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 1.8rem;
+    letter-spacing: 0.1em;
+    color: var(--text);
+  }
+
+  .section-date {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 0.2em;
+  }
+
+  /* ROUTINE CHECKLIST */
+  .routine-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .routine-item:last-child { border-bottom: none; }
+
+  .routine-item:hover { padding-left: 6px; }
+
+  .check-box {
+    width: 22px;
+    height: 22px;
+    border: 2px solid var(--muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+    font-size: 12px;
+  }
+
+  .check-box.done {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: #000;
+  }
+
+  .routine-text {
+    font-size: 0.88rem;
+    color: var(--text);
+    flex: 1;
+  }
+
+  .routine-time {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--muted);
+  }
+
+  .routine-item.done-item .routine-text {
+    text-decoration: line-through;
+    color: var(--muted);
+  }
+
+  /* PROGRESS BAR */
+  .progress-bar {
+    background: var(--border);
+    height: 4px;
+    margin-top: 14px;
+    position: relative;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    transition: width 0.4s ease;
+  }
+
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 6px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+  }
+
+  /* CHALLENGE */
+  .challenge-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+
+  .challenge-option {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 18px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+  }
+
+  .challenge-option:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+
+  .challenge-option.selected {
+    border-color: var(--accent);
+    background: rgba(232,255,0,0.05);
+  }
+
+  .challenge-icon { font-size: 1.8rem; margin-bottom: 8px; }
+
+  .challenge-name {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 1rem;
+    letter-spacing: 0.08em;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .challenge-desc {
+    font-size: 0.72rem;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+
+  .challenge-difficulty {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.6rem;
+    margin-top: 8px;
+    padding: 3px 8px;
+    display: inline-block;
+  }
+
+  .diff-hard { background: rgba(255,60,0,0.15); color: var(--accent2); border: 1px solid var(--accent2); }
+  .diff-medium { background: rgba(255,145,0,0.15); color: var(--warn); border: 1px solid var(--warn); }
+  .diff-easy { background: rgba(0,230,118,0.1); color: var(--success); border: 1px solid var(--success); }
+
+  /* CONFIRM BTN */
+  .btn {
+    background: var(--accent);
+    color: #000;
+    border: none;
+    font-family: 'Bebas Neue', cursive;
+    font-size: 1.1rem;
+    letter-spacing: 0.12em;
+    padding: 12px 28px;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: inline-block;
+  }
+
+  .btn:hover { background: #fff; transform: translateY(-1px); }
+  .btn:active { transform: translateY(0); }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); background: transparent; }
+
+  .btn-danger {
+    background: var(--accent2);
+    color: #fff;
+  }
+
+  /* INPUT */
+  input[type="text"], input[type="number"], textarea, select {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 0.88rem;
+    padding: 10px 14px;
+    width: 100%;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:focus {
+    border-color: var(--accent);
+  }
+
+  select option { background: var(--surface2); }
+
+  /* GOALS */
+  .goal-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 16px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .goal-emoji { font-size: 1.4rem; }
+
+  .goal-info { flex: 1; }
+
+  .goal-name {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.82rem;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .goal-category {
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  .goal-delete {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 1rem;
+    transition: color 0.2s;
+  }
+
+  .goal-delete:hover { color: var(--accent2); }
+
+  /* METRICS */
+  .metric-input-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .metric-input-row label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 0.2em;
+    width: 100px;
+    flex-shrink: 0;
+  }
+
+  /* SLEEP RATING */
+  .star-row { display: flex; gap: 6px; margin-top: 8px; }
+
+  .star {
+    font-size: 1.4rem;
+    cursor: pointer;
+    opacity: 0.3;
+    transition: opacity 0.15s;
+  }
+
+  .star.active { opacity: 1; }
+
+  /* STATS RING */
+  .ring-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 0;
+  }
+
+  svg.ring { transform: rotate(-90deg); }
+
+  .ring-val {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 2.2rem;
+    text-anchor: middle;
+    fill: var(--text);
+    dominant-baseline: middle;
+    transform: rotate(90deg) translateX(0);
+  }
+
+  /* MOOD */
+  .mood-row { display: flex; gap: 12px; margin-top: 8px; }
+
+  .mood-btn {
+    font-size: 1.6rem;
+    cursor: pointer;
+    opacity: 0.35;
+    transition: all 0.2s;
+    background: none;
+    border: none;
+    padding: 4px;
+  }
+
+  .mood-btn:hover, .mood-btn.active { opacity: 1; transform: scale(1.15); }
+
+  /* NOTIFICATION */
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: var(--accent);
+    color: #000;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.8rem;
+    padding: 12px 20px;
+    z-index: 1000;
+    transform: translateX(200px);
+    opacity: 0;
+    transition: all 0.3s ease;
+    letter-spacing: 0.1em;
+  }
+
+  .toast.show { transform: translateX(0); opacity: 1; }
+
+  /* SCROLL */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); }
+
+  /* RESPONSIVE */
+  @media (max-width: 900px) {
+    .grid-3, .grid-4 { grid-template-columns: 1fr 1fr; }
+    .challenge-cards { grid-template-columns: 1fr; }
+    main { padding: 20px 16px; }
+    header { padding: 16px; }
+    .nav-tabs { padding: 0 16px; }
+  }
+
+  @media (max-width: 600px) {
+    .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+  }
+
+  /* ANIMATION */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .section.active { animation: fadeIn 0.25s ease; }
+
+  .accent { color: var(--accent); }
+  .muted { color: var(--muted); }
+
+  /* ADD GOAL FORM */
+  .add-form {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 20px;
+    margin-top: 16px;
+    display: none;
+  }
+
+  .add-form.visible { display: block; }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .form-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--muted);
+    letter-spacing: 0.2em;
+    margin-bottom: 6px;
+    display: block;
+  }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 20px 0;
+  }
+
+  .tag {
+    display: inline-block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.15em;
+    padding: 3px 9px;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .tag.gym { border-color: var(--accent2); color: var(--accent2); }
+  .tag.ki { border-color: #7c3aed; color: #a78bfa; }
+  .tag.health { border-color: var(--success); color: var(--success); }
+  .tag.mindset { border-color: var(--accent); color: var(--accent); }
+  .tag.business { border-color: var(--warn); color: var(--warn); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    DIMITRI
+    <span>// DAILY COMMAND CENTER</span>
+  </div>
+  <div class="header-right">
+    <div class="date-time" id="clock"></div>
+    <div class="streak-badge" id="streakBadge">🔥 0 DAYS</div>
+  </div>
+</header>
+
+<nav class="nav-tabs">
+  <button class="nav-tab active" onclick="showSection('today',this)">TODAY</button>
+  <button class="nav-tab" onclick="showSection('challenge',this)">CHALLENGE</button>
+  <button class="nav-tab" onclick="showSection('goals',this)">ZIELE</button>
+  <button class="nav-tab" onclick="showSection('health',this)">HEALTH</button>
+  <button class="nav-tab" onclick="showSection('gym',this)">GYM</button>
+  <button class="nav-tab" onclick="showSection('notes',this)">NOTIZEN</button>
+  <button class="nav-tab" onclick="showSection('finanzen',this)">FINANZEN</button>
+  <button class="nav-tab" onclick="showSection('week',this)">WOCHE</button>
+  <button class="nav-tab" onclick="showSection('milestones',this)">MEILENSTEINE</button>
+  <button class="nav-tab" onclick="showSection('breathtimer',this)">BREATHING</button>
+  <button class="nav-tab" onclick="showSection('ki',this)">KI-PROJEKT</button>
+</nav>
+
+<main>
+
+  <!-- TODAY -->
+  <div class="section active" id="section-today">
+    <div class="section-header">
+      <div class="section-title">HEUTE</div>
+      <div class="section-date" id="todayDate"></div>
+    </div>
+
+    <div class="grid-4" style="margin-bottom:20px;">
+      <div class="card">
+        <div class="card-label">Routine</div>
+        <div class="card-value accent" id="routineScore">0%</div>
+        <div class="card-sub">von 10 Punkten</div>
+        <div class="progress-bar"><div class="progress-fill" id="routineBar" style="width:0%"></div></div>
+      </div>
+      <div class="card">
+        <div class="card-label">Stimmung</div>
+        <div class="card-value" id="moodDisplay">—</div>
+        <div class="card-sub">heute</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Schlaf</div>
+        <div class="card-value" id="sleepDisplay">—</div>
+        <div class="card-sub">Stunden</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Challenge</div>
+        <div class="card-value" id="challengeDisplay" style="font-size:1.4rem;">—</div>
+        <div class="card-sub" id="challengeStatus">nicht gewählt</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">🌅 MORGEN-ROUTINE</div>
+        <div id="morningRoutine"></div>
+        <div class="progress-bar"><div class="progress-fill" id="morningBar" style="width:0%"></div></div>
+        <div class="progress-label"><span id="morningCount">0/6 erledigt</span><span id="morningPct">0%</span></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🌙 ABEND-ROUTINE</div>
+        <div id="eveningRoutine"></div>
+        <div class="progress-bar"><div class="progress-fill" id="eveningBar" style="width:0%"></div></div>
+        <div class="progress-label"><span id="eveningCount">0/3 erledigt</span><span id="eveningPct">0%</span></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">💨 BOX BREATHING</div>
+        <div id="breathingRoutine"></div>
+        <div class="progress-bar"><div class="progress-fill" id="breathingBar" style="width:0%"></div></div>
+        <div class="progress-label"><span id="breathingCount">0/2 erledigt</span><span id="breathingPct">0%</span></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">😴 SCHLAF & STIMMUNG</div>
+        <div class="metric-input-row" style="margin-bottom:14px;">
+          <label>SCHLAF (H)</label>
+          <input type="number" id="sleepHours" min="0" max="12" step="0.5" placeholder="7.5" oninput="saveSleep(this.value)">
+        </div>
+        <div class="form-label">SCHLAFQUALITÄT</div>
+        <div class="star-row" id="sleepStars"></div>
+        <hr class="divider">
+        <div class="form-label">STIMMUNG HEUTE</div>
+        <div class="mood-row" id="moodRow"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHALLENGE -->
+  <div class="section" id="section-challenge">
+    <div class="section-header">
+      <div class="section-title">TAGES-CHALLENGE</div>
+      <div class="section-date">Wähle deine heutige Mission</div>
+    </div>
+
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-title">⚡ WÄHLE DEINE HERAUSFORDERUNG</div>
+      <p style="font-size:0.83rem; color:var(--muted); margin-bottom:18px; line-height:1.6;">
+        Drei Optionen. Wähle eine. Erledige sie heute. Keine Ausreden.
+      </p>
+      <div class="challenge-cards" id="challengeCards"></div>
+      <button class="btn" onclick="confirmChallenge()" id="confirmBtn" style="display:none;">CHALLENGE ANNEHMEN →</button>
+    </div>
+
+    <div class="card" id="activeChallenge" style="display:none;">
+      <div class="card-title">🔥 AKTIVE CHALLENGE</div>
+      <div id="activeChallengeContent"></div>
+      <hr class="divider">
+      <button class="btn" onclick="completeChallenge()">✓ ERLEDIGT — NEXT LEVEL</button>
+      <button class="btn btn-ghost" onclick="resetChallenge()" style="margin-left:10px;">NEUE CHALLENGES</button>
+    </div>
+  </div>
+
+  <!-- GOALS -->
+  <div class="section" id="section-goals">
+    <div class="section-header">
+      <div class="section-title">MEINE ZIELE</div>
+      <div class="section-date">Was du baust</div>
+    </div>
+
+    <div class="grid-2" style="margin-bottom:20px;">
+      <div class="card">
+        <div class="card-label">Gesamt Ziele</div>
+        <div class="card-value accent" id="totalGoals">0</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Kategorien</div>
+        <div class="card-value" id="totalCats">0</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">AKTIVE ZIELE</div>
+      <div id="goalsList"></div>
+      <hr class="divider">
+      <button class="btn btn-ghost" onclick="toggleAddGoal()">+ NEUES ZIEL</button>
+      <div class="add-form" id="addGoalForm">
+        <div class="form-row">
+          <div>
+            <span class="form-label">ZIEL</span>
+            <input type="text" id="goalName" placeholder="z.B. KI-Projekt launchen">
+          </div>
+          <div>
+            <span class="form-label">KATEGORIE</span>
+            <select id="goalCategory">
+              <option value="gym">💪 GYM</option>
+              <option value="ki">🤖 KI-Projekt</option>
+              <option value="health">❤️ HEALTH</option>
+              <option value="mindset">🧠 MINDSET</option>
+              <option value="business">💼 BUSINESS</option>
+            </select>
+          </div>
+        </div>
+        <div style="margin-bottom:12px;">
+          <span class="form-label">EMOJI (optional)</span>
+          <input type="text" id="goalEmoji" placeholder="🎯" style="max-width:80px;">
+        </div>
+        <button class="btn" onclick="addGoal()">HINZUFÜGEN</button>
+        <button class="btn btn-ghost" onclick="toggleAddGoal()" style="margin-left:10px;">ABBRECHEN</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HEALTH -->
+  <div class="section" id="section-health">
+    <div class="section-header">
+      <div class="section-title">HEALTH METRICS</div>
+      <div class="section-date">Deine Vitaldaten</div>
+    </div>
+
+    <div class="grid-3" style="margin-bottom:20px;">
+      <div class="card">
+        <div class="card-label">Gewicht</div>
+        <div class="card-value accent" id="weightDisplay">—</div>
+        <div class="card-sub">kg</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Wasser</div>
+        <div class="card-value" id="waterDisplay">0</div>
+        <div class="card-sub">Gläser heute (Ziel: 8)</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Energie</div>
+        <div class="card-value" id="energyDisplay">—</div>
+        <div class="card-sub">von 10</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">📊 METRIKEN EINTRAGEN</div>
+        <div class="metric-input-row">
+          <label>GEWICHT (kg)</label>
+          <input type="number" id="weightInput" placeholder="75" step="0.1" oninput="saveMetric('weight', this.value)">
+        </div>
+        <div class="metric-input-row">
+          <label>ENERGIE (1-10)</label>
+          <input type="number" id="energyInput" min="1" max="10" placeholder="8" oninput="saveMetric('energy', this.value)">
+        </div>
+        <div class="metric-input-row">
+          <label>NOTIZ</label>
+          <textarea id="healthNote" rows="2" placeholder="Wie fühlst du dich heute körperlich?" style="resize:none;" oninput="saveMetric('healthNote', this.value)"></textarea>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">💧 WASSER TRACKER</div>
+        <p style="font-size:0.8rem; color:var(--muted); margin-bottom:14px;">Ziel: 8 Gläser täglich</p>
+        <div style="display:flex; flex-wrap:wrap; gap:10px;" id="waterGlasses"></div>
+        <div class="progress-bar" style="margin-top:16px;"><div class="progress-fill" id="waterBar" style="width:0%"></div></div>
+        <div class="progress-label"><span id="waterCount">0 / 8 Gläser</span><span id="waterPct">0%</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GYM -->
+  <div class="section" id="section-gym">
+    <div class="section-header">
+      <div class="section-title">GYM LOG</div>
+      <div class="section-date">Trainingseinheiten tracken</div>
+    </div>
+
+    <div class="grid-3" style="margin-bottom:20px;">
+      <div class="card">
+        <div class="card-label">Diese Woche</div>
+        <div class="card-value accent" id="weekWorkouts">0</div>
+        <div class="card-sub">Einheiten</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Diesen Monat</div>
+        <div class="card-value" id="monthWorkouts">0</div>
+        <div class="card-sub">Einheiten</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Gesamt</div>
+        <div class="card-value" id="totalWorkouts">0</div>
+        <div class="card-sub">Einheiten</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-title">+ WORKOUT EINTRAGEN</div>
+      <div class="form-row" style="margin-bottom:12px;">
+        <div>
+          <span class="form-label">TYP</span>
+          <select id="muscleGroup" onchange="switchWorkoutForm(this.value)">
+            <option value="Push">🔴 Push (Brust / Schultern / Trizeps)</option>
+            <option value="Pull">🔵 Pull (Rücken / Bizeps)</option>
+            <option value="Legs">🟢 Legs (Beine / Po)</option>
+            <option value="Boxen">🥊 Boxen</option>
+            <option value="Core">🎯 Core / Abs</option>
+            <option value="Cardio">🏃 Cardio</option>
+            <option value="Fullbody">⚡ Fullbody</option>
+          </select>
+        </div>
+        <div>
+          <span class="form-label">DAUER (min)</span>
+          <input type="number" id="workoutDuration" placeholder="60" min="10" max="180">
+        </div>
+      </div>
+
+      <!-- Standard Felder (Push/Pull/Legs/Fullbody) -->
+      <div id="formStandard">
+        <div style="margin-bottom:12px;">
+          <span class="form-label">NOTIZ / ÜBUNGEN</span>
+          <textarea id="workoutNote" rows="2" placeholder="z.B. Bankdrücken 80kg 3x8..." style="resize:none;"></textarea>
+        </div>
+      </div>
+
+      <!-- Boxen Felder -->
+      <div id="formBoxen" style="display:none;">
+        <div class="form-row" style="margin-bottom:12px;">
+          <div>
+            <span class="form-label">RUNDEN</span>
+            <input type="number" id="boxRunden" placeholder="6" min="1" max="20">
+          </div>
+          <div>
+            <span class="form-label">MODUS</span>
+            <select id="boxModus">
+              <option value="Solo / Shadowboxing">Solo / Shadowboxing</option>
+              <option value="Sandsack">Sandsack</option>
+              <option value="Partner / Sparring">Partner / Sparring</option>
+              <option value="Pratzen">Pratzen</option>
+            </select>
+          </div>
+        </div>
+        <div style="margin-bottom:12px;">
+          <span class="form-label">KOMBIS / FOKUS</span>
+          <textarea id="boxKombis" rows="2" placeholder="z.B. Jab-Cross-Hook, Footwork, Defense..." style="resize:none;"></textarea>
+        </div>
+      </div>
+
+      <!-- Core Felder -->
+      <div id="formCore" style="display:none;">
+        <div class="form-row" style="margin-bottom:12px;">
+          <div>
+            <span class="form-label">PLANK (Sek)</span>
+            <input type="number" id="corePlank" placeholder="60" min="0">
+          </div>
+          <div>
+            <span class="form-label">SETS</span>
+            <input type="number" id="coreSets" placeholder="3" min="1" max="20">
+          </div>
+        </div>
+        <div style="margin-bottom:12px;">
+          <span class="form-label">ÜBUNGEN</span>
+          <textarea id="coreUebungen" rows="2" placeholder="z.B. Crunches 3x20, Leg Raises 3x15, Russian Twists..." style="resize:none;"></textarea>
+        </div>
+      </div>
+
+      <!-- Cardio Felder -->
+      <div id="formCardio" style="display:none;">
+        <div class="form-row" style="margin-bottom:12px;">
+          <div>
+            <span class="form-label">DISTANZ (km)</span>
+            <input type="number" id="cardioKm" placeholder="5" step="0.1" min="0">
+          </div>
+          <div>
+            <span class="form-label">TYP</span>
+            <select id="cardioTyp">
+              <option value="Laufen">🏃 Laufen</option>
+              <option value="Fahrrad">🚴 Fahrrad</option>
+              <option value="Sprints">⚡ Sprints</option>
+              <option value="Seilspringen">🪢 Seilspringen</option>
+              <option value="Sonstiges">Sonstiges</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-bottom:12px;">
+        <span class="form-label">INTENSITÄT</span>
+        <div class="star-row" id="workoutIntensity"></div>
+      </div>
+      <button class="btn" onclick="logWorkout()">WORKOUT SPEICHERN →</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📋 WORKOUT HISTORY</div>
+      <div id="workoutHistory"></div>
+    </div>
+  </div>
+
+  <!-- NOTIZEN -->
+  <div class="section" id="section-notes">
+    <div class="section-header">
+      <div class="section-title">NOTIZEN</div>
+      <div class="section-date">Wins, Fails, Erkenntnisse</div>
+    </div>
+
+    <!-- STATS ROW -->
+    <div class="grid-4" style="margin-bottom:20px;">
+      <div class="card">
+        <div class="card-label">Gesamt</div>
+        <div class="card-value accent" id="noteTotal">0</div>
+      </div>
+      <div class="card">
+        <div class="card-label">✅ Wins</div>
+        <div class="card-value" id="noteWins" style="color:var(--success);">0</div>
+      </div>
+      <div class="card">
+        <div class="card-label">❌ Fails</div>
+        <div class="card-value" id="noteFails" style="color:var(--accent2);">0</div>
+      </div>
+      <div class="card">
+        <div class="card-label">💡 Erkenntnisse</div>
+        <div class="card-value" id="noteInsights" style="color:var(--warn);">0</div>
+      </div>
+    </div>
+
+    <!-- ADD NOTE -->
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-title">+ NEUE NOTIZ</div>
+      <div class="form-row" style="margin-bottom:12px;">
+        <div>
+          <span class="form-label">TYP</span>
+          <select id="noteType">
+            <option value="win">✅ Win / Erfolg</option>
+            <option value="fail">❌ Fail / Fehler</option>
+            <option value="insight">💡 Erkenntnis</option>
+            <option value="repair">🔧 Repariert / Gelöst</option>
+            <option value="record">🏆 Rekord erreicht</option>
+            <option value="misc">📌 Sonstiges</option>
+          </select>
+        </div>
+        <div>
+          <span class="form-label">KATEGORIE</span>
+          <select id="noteCategory">
+            <option value="gym">💪 GYM</option>
+            <option value="ki">🤖 KI-Projekt</option>
+            <option value="health">❤️ Health</option>
+            <option value="mindset">🧠 Mindset</option>
+            <option value="business">💼 Business</option>
+            <option value="alltag">🏠 Alltag</option>
+            <option value="beziehung">💬 Beziehung</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-bottom:12px;">
+        <span class="form-label">TITEL (kurz)</span>
+        <input type="text" id="noteTitle" placeholder="z.B. Bankdrücken 100kg geschafft">
+      </div>
+      <div style="margin-bottom:14px;">
+        <span class="form-label">DETAILS</span>
+        <textarea id="noteBody" rows="3" placeholder="Was genau ist passiert? Was hast du gelernt?" style="resize:none;"></textarea>
+      </div>
+      <button class="btn" onclick="addNote()">NOTIZ SPEICHERN →</button>
+    </div>
+
+    <!-- FILTER -->
+    <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px;" id="noteFilters">
+      <button class="btn btn-ghost" style="font-size:0.72rem; padding:8px 14px;" onclick="filterNotes('all')">ALLE</button>
+      <button class="btn btn-ghost" style="font-size:0.72rem; padding:8px 14px;" onclick="filterNotes('win')">✅ WINS</button>
+      <button class="btn btn-ghost" style="font-size:0.72rem; padding:8px 14px;" onclick="filterNotes('fail')">❌ FAILS</button>
+      <button class="btn btn-ghost" style="font-size:0.72rem; padding:8px 14px;" onclick="filterNotes('insight')">💡 ERKENNTNISSE</button>
+      <button class="btn btn-ghost" style="font-size:0.72rem; padding:8px 14px;" onclick="filterNotes('record')">🏆 REKORDE</button>
+      <button class="btn btn-ghost" style="font-size:0.72rem; padding:8px 14px;" onclick="filterNotes('repair')">🔧 REPARIERT</button>
+      <button class="btn btn-ghost" style="font-size:0.72rem; padding:8px 14px;" onclick="filterNotes('gym')">💪 GYM</button>
+      <button class="btn btn-ghost" style="font-size:0.72rem; padding:8px 14px;" onclick="filterNotes('ki')">🤖 KI</button>
+    </div>
+
+    <!-- NOTES LIST -->
+    <div id="notesList"></div>
+  </div>
+
+  <!-- FINANZEN -->
+  <div class="section" id="section-finanzen">
+    <div class="section-header">
+      <div class="section-title">FINANZEN</div>
+      <div class="section-date">Täglich tracken</div>
+    </div>
+    <div class="grid-4" style="margin-bottom:20px;">
+      <div class="card">
+        <div class="card-label">Heute Einnahmen</div>
+        <div class="card-value accent" id="finTodayIn">0€</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Heute Ausgaben</div>
+        <div class="card-value" style="color:var(--accent2);" id="finTodayOut">0€</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Monat Einnahmen</div>
+        <div class="card-value" id="finMonthIn">0€</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Monat Ausgaben</div>
+        <div class="card-value" style="color:var(--accent2);" id="finMonthOut">0€</div>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-bottom:16px;">
+      <div class="card">
+        <div class="card-title">+ EINTRAG</div>
+        <div class="form-row" style="margin-bottom:12px;">
+          <div>
+            <span class="form-label">TYP</span>
+            <select id="finType">
+              <option value="income">💰 Einnahme</option>
+              <option value="expense">💸 Ausgabe</option>
+            </select>
+          </div>
+          <div>
+            <span class="form-label">KATEGORIE</span>
+            <select id="finCat">
+              <option value="business">💼 Business</option>
+              <option value="essen">🍔 Essen</option>
+              <option value="transport">🚗 Transport</option>
+              <option value="gym">💪 Gym</option>
+              <option value="investition">📈 Investition</option>
+              <option value="sonstiges">📌 Sonstiges</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row" style="margin-bottom:12px;">
+          <div>
+            <span class="form-label">BETRAG (€)</span>
+            <input type="number" id="finAmount" placeholder="0.00" step="0.01" min="0">
+          </div>
+          <div>
+            <span class="form-label">BESCHREIBUNG</span>
+            <input type="text" id="finDesc" placeholder="z.B. Kundenrechnung">
+          </div>
+        </div>
+        <button class="btn" onclick="addFinEntry()">SPEICHERN →</button>
+      </div>
+      <div class="card">
+        <div class="card-title">🎯 MONATSZIEL</div>
+        <div style="margin-bottom:12px;">
+          <span class="form-label">EINNAHMEN-ZIEL (€)</span>
+          <input type="number" id="finGoalInput" placeholder="3000" oninput="saveFinGoal(this.value)">
+        </div>
+        <div class="progress-bar" style="margin-top:8px;"><div class="progress-fill" id="finGoalBar" style="width:0%"></div></div>
+        <div class="progress-label"><span id="finGoalLabel">0 / 0€</span><span id="finGoalPct">0%</span></div>
+        <hr class="divider">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:0.7rem;color:var(--muted);">MONATSBILANZ</div>
+        <div style="font-family:'Bebas Neue',cursive;font-size:2rem;margin-top:6px;" id="finBalance">0€</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📋 LETZTE EINTRÄGE</div>
+      <div id="finHistory"></div>
+    </div>
+  </div>
+
+  <!-- WOCHE -->
+  <div class="section" id="section-week">
+    <div class="section-header">
+      <div class="section-title">WOCHENÜBERSICHT</div>
+      <div class="section-date" id="weekRange"></div>
+    </div>
+    <div class="grid-4" style="margin-bottom:20px;">
+      <div class="card">
+        <div class="card-label">Ø Routine</div>
+        <div class="card-value accent" id="wkRoutine">—</div>
+        <div class="card-sub">diese Woche</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Workouts</div>
+        <div class="card-value" id="wkWorkouts">0</div>
+        <div class="card-sub">Einheiten</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Ø Schlaf</div>
+        <div class="card-value" id="wkSleep">—</div>
+        <div class="card-sub">Stunden</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Challenges</div>
+        <div class="card-value" id="wkChallenges">0</div>
+        <div class="card-sub">abgeschlossen</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📅 TAGE DIESE WOCHE</div>
+      <div id="weekDays" style="display:grid; grid-template-columns: repeat(7,1fr); gap:10px; margin-top:8px;"></div>
+    </div>
+  </div>
+
+  <!-- MEILENSTEINE -->
+  <div class="section" id="section-milestones">
+    <div class="section-header">
+      <div class="section-title">MEILENSTEINE</div>
+      <div class="section-date">Was du in welcher Zeit erreichen sollst</div>
+    </div>
+    <div id="milestonesList"></div>
+    <hr class="divider">
+    <div class="card">
+      <div class="card-title">+ EIGENEN MEILENSTEIN HINZUFÜGEN</div>
+      <div class="form-row" style="margin-bottom:12px;">
+        <div>
+          <span class="form-label">TITEL</span>
+          <input type="text" id="msTitle" placeholder="z.B. 100kg Bankdrücken">
+        </div>
+        <div>
+          <span class="form-label">KATEGORIE</span>
+          <select id="msCategory">
+            <option value="gym">💪 GYM</option>
+            <option value="boxen">🥊 Boxen</option>
+            <option value="core">🎯 Core</option>
+            <option value="ki">🤖 KI-Projekt</option>
+            <option value="health">❤️ Health</option>
+            <option value="mindset">🧠 Mindset</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row" style="margin-bottom:12px;">
+        <div>
+          <span class="form-label">ZEITRAHMEN</span>
+          <select id="msTimeframe">
+            <option value="4W">4 Wochen</option>
+            <option value="8W">8 Wochen</option>
+            <option value="3M">3 Monate</option>
+            <option value="6M">6 Monate</option>
+            <option value="1J">1 Jahr</option>
+          </select>
+        </div>
+        <div>
+          <span class="form-label">EMOJI</span>
+          <input type="text" id="msEmoji" placeholder="🏆" style="max-width:80px;">
+        </div>
+      </div>
+      <button class="btn" onclick="addMilestone()">MEILENSTEIN HINZUFÜGEN →</button>
+    </div>
+  </div>
+
+  <!-- BREATHING TIMER -->
+  <div class="section" id="section-breathtimer">
+    <div class="section-header">
+      <div class="section-title">BOX BREATHING</div>
+      <div class="section-date">4 ein · 4 halten · 4 aus · 4 halten</div>
+    </div>
+    <div class="card" style="text-align:center; padding:40px 20px;">
+      <div id="breathPhase" style="font-family:'Bebas Neue',cursive; font-size:2.5rem; letter-spacing:0.15em; color:var(--accent); margin-bottom:10px;">BEREIT</div>
+      <div id="breathCount" style="font-family:'IBM Plex Mono',monospace; font-size:5rem; color:var(--text); line-height:1; margin-bottom:10px;">4</div>
+      <div id="breathRound" style="font-family:'IBM Plex Mono',monospace; font-size:0.8rem; color:var(--muted); margin-bottom:30px;">RUNDE 0 / 4</div>
+      <div style="width:200px; height:200px; margin:0 auto 30px; position:relative;">
+        <svg width="200" height="200" style="position:absolute; top:0; left:0;">
+          <circle cx="100" cy="100" r="90" fill="none" stroke="var(--border)" stroke-width="8"/>
+          <circle id="breathCircle" cx="100" cy="100" r="90" fill="none" stroke="var(--accent)" stroke-width="8"
+            stroke-dasharray="565" stroke-dashoffset="565" stroke-linecap="round"
+            style="transform:rotate(-90deg); transform-origin:center; transition:stroke-dashoffset 1s linear;"/>
+        </svg>
+        <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center;">
+          <div id="breathEmoji" style="font-size:3rem;">😮‍💨</div>
+        </div>
+      </div>
+      <button class="btn" id="breathBtn" onclick="toggleBreathing()" style="min-width:160px;">START →</button>
+      <p style="font-size:0.75rem; color:var(--muted); margin-top:20px; line-height:1.7;">Nach der Session: 5 Minuten Handy weglegen, aus dem Fenster schauen.</p>
+    </div>
+  </div>
+
+  <!-- KI PROJEKT -->
+  <div class="section" id="section-ki">
+    <div class="section-header">
+      <div class="section-title">KI-PROJEKT</div>
+      <div class="section-date">Fortschritt & Fokus</div>
+    </div>
+    <div class="grid-3" style="margin-bottom:20px;">
+      <div class="card">
+        <div class="card-label">Fokus-Sessions</div>
+        <div class="card-value accent" id="kiSessions">0</div>
+        <div class="card-sub">gesamt</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Diese Woche</div>
+        <div class="card-value" id="kiWeek">0</div>
+        <div class="card-sub">Sessions</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Gesamtstunden</div>
+        <div class="card-value" id="kiHours">0</div>
+        <div class="card-sub">Stunden</div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-title">⚡ SESSION LOGGEN</div>
+      <div class="form-row" style="margin-bottom:12px;">
+        <div>
+          <span class="form-label">DAUER (min)</span>
+          <input type="number" id="kiDuration" placeholder="120" min="15">
+        </div>
+        <div>
+          <span class="form-label">FOKUS-BEREICH</span>
+          <select id="kiFocus">
+            <option value="Entwicklung">💻 Entwicklung</option>
+            <option value="Konzept">🧠 Konzept / Planung</option>
+            <option value="Testing">🔬 Testing</option>
+            <option value="Research">📖 Research</option>
+            <option value="Launch">🚀 Launch Vorbereitung</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-bottom:12px;">
+        <span class="form-label">WAS HAST DU HEUTE GEMACHT?</span>
+        <textarea id="kiNote" rows="3" placeholder="z.B. API integriert, Fehler behoben, Feature X fertig..." style="resize:none;"></textarea>
+      </div>
+      <button class="btn" onclick="logKiSession()">SESSION SPEICHERN →</button>
+    </div>
+    <div class="card">
+      <div class="card-title">📋 SESSION HISTORY</div>
+      <div id="kiHistory"></div>
+    </div>
+  </div>
+
+</main>
+
+<!-- AAR MODAL -->
+<div id="aarModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:500;display:none;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:var(--surface);border:1px solid var(--accent2);max-width:560px;width:100%;padding:28px;">
+    <div style="font-family:'Bebas Neue',cursive;font-size:1.6rem;letter-spacing:0.1em;color:var(--accent2);margin-bottom:6px;">⚠ AFTER ACTION REPORT</div>
+    <p style="font-size:0.78rem;color:var(--muted);margin-bottom:20px;line-height:1.6;">Du hast einen Fail eingetragen. Kein Entkommen. Füll das aus.</p>
+    <div style="margin-bottom:12px;">
+      <span class="form-label">1. WAS IST PASSIERT (faktisch)</span>
+      <textarea id="aarWhat" rows="2" placeholder="Kurz und ehrlich." style="resize:none;width:100%;"></textarea>
+    </div>
+    <div style="margin-bottom:12px;">
+      <span class="form-label">2. WARUM IST ES PASSIERT (echte Ursache)</span>
+      <textarea id="aarWhy" rows="2" placeholder="Keine Ausreden. Die echte Ursache." style="resize:none;width:100%;"></textarea>
+    </div>
+    <div style="margin-bottom:12px;">
+      <span class="form-label">3. WAS HÄTTEST DU ANDERS GEMACHT</span>
+      <textarea id="aarDiff" rows="2" placeholder="Eine konkrete Sache." style="resize:none;width:100%;"></textarea>
+    </div>
+    <div style="margin-bottom:20px;">
+      <span class="form-label">4. WAS MACHST DU MORGEN KONKRET</span>
+      <textarea id="aarNext" rows="2" placeholder="Eine Aktion. Messbar." style="resize:none;width:100%;"></textarea>
+    </div>
+    <button class="btn" onclick="submitAAR()">AAR SPEICHERN → WEITER</button>
+  </div>
+</div>
+
+<!-- ABEND REVIEW MODAL (22:00) -->
+<div id="reviewModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:600;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:var(--surface);border:1px solid var(--accent);max-width:560px;width:100%;padding:28px;">
+    <div style="font-family:'Bebas Neue',cursive;font-size:1.6rem;letter-spacing:0.1em;color:var(--accent);margin-bottom:6px;">🌙 ABEND-REVIEW — 22:00</div>
+    <p style="font-size:0.78rem;color:var(--muted);margin-bottom:20px;line-height:1.6;">Tag abschließen. Pflicht. Danach kannst du schlafen.</p>
+    <div id="reviewSummary" style="background:var(--surface2);padding:16px;margin-bottom:16px;font-family:'IBM Plex Mono',monospace;font-size:0.75rem;line-height:2;color:var(--muted);"></div>
+    <div style="margin-bottom:20px;">
+      <span class="form-label">EINE SACHE DIE HEUTE GUT WAR</span>
+      <input type="text" id="reviewGood" placeholder="Konkret.">
+    </div>
+    <div style="margin-bottom:20px;">
+      <span class="form-label">EINE SACHE DIE DU MORGEN BESSER MACHST</span>
+      <input type="text" id="reviewBetter" placeholder="Messbar.">
+    </div>
+    <button class="btn" onclick="submitReview()" style="width:100%;">TAG ABSCHLIESSEN → KI-BEWERTUNG</button>
+  </div>
+</div>
+
+<!-- KI BEWERTUNG MODAL -->
+<div id="kiReviewModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:700;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:var(--surface);border:1px solid var(--accent);max-width:600px;width:100%;padding:28px;max-height:90vh;overflow-y:auto;">
+    <div style="font-family:'Bebas Neue',cursive;font-size:1.6rem;letter-spacing:0.1em;color:var(--accent);margin-bottom:20px;">⚡ KI-TAGESBEWERTUNG</div>
+    <div id="kiReviewContent" style="font-size:0.88rem;line-height:1.8;color:var(--text);">
+      <div style="color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:0.75rem;">Analysiere deinen Tag...</div>
+    </div>
+    <hr class="divider">
+    <button class="btn" onclick="closeKiReview()" style="width:100%;">VERSTANDEN — GUTE NACHT</button>
+  </div>
+</div>
+
+<!-- STREAK WARNING -->
+<div id="streakWarning" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:800;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:var(--surface);border:1px solid var(--accent2);max-width:480px;width:100%;padding:28px;text-align:center;">
+    <div style="font-size:3rem;margin-bottom:12px;">💀</div>
+    <div style="font-family:'Bebas Neue',cursive;font-size:1.8rem;color:var(--accent2);margin-bottom:10px;">3 TAGE KEIN EINTRAG</div>
+    <p style="font-size:0.85rem;color:var(--muted);line-height:1.7;margin-bottom:24px;">Du bist abgetaucht. Das ist genau das Muster das dich aufhält. Schreib jetzt einen AAR bevor du weitermachst.</p>
+    <div style="margin-bottom:16px;">
+      <span class="form-label">WARUM WARST DU WEG</span>
+      <textarea id="streakAARText" rows="3" placeholder="Ehrlich." style="resize:none;width:100%;"></textarea>
+    </div>
+    <button class="btn btn-danger" onclick="dismissStreakWarning()" style="width:100%;">GESCHRIEBEN — WEITER</button>
+  </div>
+</div>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ==============================
+// STATE & STORAGE
+// ==============================
+const KEY = 'dimitri_v2';
+let state = JSON.parse(localStorage.getItem(KEY) || '{}');
+
+function todayKey() {
+  return new Date().toISOString().split('T')[0];
+}
+
+function save() {
+  localStorage.setItem(KEY, JSON.stringify(state));
+}
+
+function getToday() {
+  const k = todayKey();
+  if (!state[k]) state[k] = {};
+  return state[k];
+}
+
+// ==============================
+// CLOCK
+// ==============================
+function updateClock() {
+  const now = new Date();
+  const opts = { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' };
+  const date = now.toLocaleDateString('de-DE', opts);
+  const time = now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  document.getElementById('clock').innerHTML = `${time}<br>${date}`;
+  document.getElementById('todayDate').textContent = date.toUpperCase();
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ==============================
+// NAV
+// ==============================
+function showSection(id, el) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('section-' + id).classList.add('active');
+  if (el) el.classList.add('active');
+}
+
+// ==============================
+// TOAST
+// ==============================
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ==============================
+// ROUTINES
+// ==============================
+const MORNING = [
+  { id: 'm1', text: 'Aufgewacht & kaltes Wasser getrunken', time: '05:30' },
+  { id: 'm2', text: 'Partner Nachricht geschickt', time: '05:32' },
+  { id: 'm3', text: '10 Push-ups gemacht', time: '05:35' },
+  { id: 'm4', text: 'Spiegel Check-in (2 Fragen)', time: '05:37' },
+  { id: 'm5', text: 'Box Breathing 05:40 (4 Runden)', time: '05:40' },
+  { id: 'm6', text: '5 Min Fenster schauen nach Breathing', time: '05:45' },
+];
+
+const EVENING = [
+  { id: 'e1', text: 'Journal: Tagebuch 3 Sätze + Checkmark', time: '21:30' },
+  { id: 'e3', text: '10 Seiten gelesen', time: '21:40' },
+  { id: 'e4', text: 'Box Breathing 21:40 (4 Runden)', time: '21:40' },
+];
+
+const BREATHING = [
+  { id: 'b1', text: 'Box Breathing 05:40', time: '05:40' },
+  { id: 'b3', text: 'Box Breathing 21:40', time: '21:40' },
+];
+
+function renderRoutine(containerId, items, barId, countId, pctId, stateKey) {
+  const d = getToday();
+  if (!d[stateKey]) d[stateKey] = {};
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+  let done = 0;
+  items.forEach(item => {
+    const checked = !!d[stateKey][item.id];
+    if (checked) done++;
+    const div = document.createElement('div');
+    div.className = 'routine-item' + (checked ? ' done-item' : '');
+    div.innerHTML = `
+      <div class="check-box ${checked ? 'done' : ''}" id="cb_${item.id}">${checked ? '✓' : ''}</div>
+      <span class="routine-text">${item.text}</span>
+      <span class="routine-time">${item.time}</span>
+    `;
+    div.onclick = () => toggleRoutine(item.id, stateKey, containerId, items, barId, countId, pctId);
+    container.appendChild(div);
+  });
+  const pct = Math.round((done / items.length) * 100);
+  document.getElementById(barId).style.width = pct + '%';
+  document.getElementById(countId).textContent = `${done}/${items.length} erledigt`;
+  document.getElementById(pctId).textContent = pct + '%';
+  updateOverallScore();
+}
+
+function toggleRoutine(id, stateKey, containerId, items, barId, countId, pctId) {
+  const d = getToday();
+  if (!d[stateKey]) d[stateKey] = {};
+  d[stateKey][id] = !d[stateKey][id];
+  save();
+  renderRoutine(containerId, items, barId, countId, pctId, stateKey);
+  if (d[stateKey][id]) toast('✓ Erledigt!');
+}
+
+function updateOverallScore() {
+  const d = getToday();
+  const all = [...MORNING, ...EVENING, ...BREATHING];
+  let done = 0;
+  ['morning', 'evening', 'breathing'].forEach(k => {
+    if (d[k]) Object.values(d[k]).forEach(v => { if (v) done++; });
+  });
+  const pct = Math.round((done / all.length) * 100);
+  document.getElementById('routineScore').textContent = pct + '%';
+  document.getElementById('routineBar').style.width = pct + '%';
+}
+
+function initRoutines() {
+  renderRoutine('morningRoutine', MORNING, 'morningBar', 'morningCount', 'morningPct', 'morning');
+  renderRoutine('eveningRoutine', EVENING, 'eveningBar', 'eveningCount', 'eveningPct', 'evening');
+  renderRoutine('breathingRoutine', BREATHING, 'breathingBar', 'breathingCount', 'breathingPct', 'breathing');
+}
+
+// ==============================
+// SLEEP & MOOD
+// ==============================
+function initSleep() {
+  const d = getToday();
+  // Stars
+  const starRow = document.getElementById('sleepStars');
+  starRow.innerHTML = '';
+  for (let i = 1; i <= 5; i++) {
+    const s = document.createElement('span');
+    s.className = 'star' + (d.sleepQuality >= i ? ' active' : '');
+    s.textContent = '★';
+    s.onclick = () => { d.sleepQuality = i; save(); initSleep(); document.getElementById('sleepDisplay').textContent = d.sleepHours || '—'; toast('Schlafqualität gespeichert!'); };
+    starRow.appendChild(s);
+  }
+  if (d.sleepHours) document.getElementById('sleepInput') && (document.getElementById('sleepHours').value = d.sleepHours);
+  document.getElementById('sleepDisplay').textContent = d.sleepHours || '—';
+
+  // Mood
+  const moods = ['😫', '😕', '😐', '🙂', '🔥'];
+  const moodRow = document.getElementById('moodRow');
+  moodRow.innerHTML = '';
+  moods.forEach((m, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'mood-btn' + (d.mood === i ? ' active' : '');
+    btn.textContent = m;
+    btn.onclick = () => { d.mood = i; save(); initSleep(); document.getElementById('moodDisplay').textContent = m; toast('Stimmung gespeichert!'); };
+    moodRow.appendChild(btn);
+  });
+
+  if (d.mood !== undefined) document.getElementById('moodDisplay').textContent = moods[d.mood];
+}
+
+function saveSleep(v) {
+  const d = getToday();
+  d.sleepHours = v;
+  save();
+  document.getElementById('sleepDisplay').textContent = v || '—';
+}
+
+// ==============================
+// CHALLENGES
+// ==============================
+const ALL_CHALLENGES = [
+  { id: 'c1', icon: '🥶', name: 'Kalte Dusche', desc: '3 Minuten kalt duschen. Keine Aufwärmphase. Direkt rein.', diff: 'hard', cat: 'mindset' },
+  { id: 'c2', icon: '📵', name: 'Kein Social Media', desc: 'Handy-Nutzung auf Nachrichten limitieren. Kein Scrollen.', diff: 'medium', cat: 'mindset' },
+  { id: 'c3', icon: '💪', name: '100 Push-Ups', desc: 'Aufgeteilt über den Tag. Nicht verhandelbar.', diff: 'hard', cat: 'gym' },
+  { id: 'c4', icon: '📖', name: '30 Seiten lesen', desc: 'Statt Content konsumieren – Wissen aufbauen.', diff: 'medium', cat: 'mindset' },
+  { id: 'c5', icon: '✍️', name: 'Tagebuch 10 Minuten', desc: 'Tiefer gehen als 3 Sätze. Was hält dich gerade wirklich auf?', diff: 'easy', cat: 'mindset' },
+  { id: 'c6', icon: '🏃', name: '5km laufen', desc: 'Draußen. Egal wie das Wetter ist.', diff: 'hard', cat: 'gym' },
+  { id: 'c7', icon: '🤖', name: 'KI-Projekt: 2h fokus', desc: 'Zwei Stunden ohne Unterbrechung am KI-Projekt arbeiten.', diff: 'medium', cat: 'ki' },
+  { id: 'c8', icon: '🧘', name: '10 Min Meditation', desc: 'Kein Handy, kein Lärm. Sitz still und atme.', diff: 'easy', cat: 'mindset' },
+  { id: 'c9', icon: '💬', name: 'Grenze aussprechen', desc: 'Eine Grenze verbal setzen – laut und klar.', diff: 'medium', cat: 'mindset' },
+  { id: 'c10', icon: '🥗', name: 'Kein Zucker heute', desc: 'Komplett clean essen. Keine Ausnahme.', diff: 'hard', cat: 'health' },
+  { id: 'c11', icon: '📞', name: 'Wichtigen Anruf machen', desc: 'Einen Anruf den du aufgeschoben hast – heute erledigen.', diff: 'easy', cat: 'business' },
+  { id: 'c12', icon: '⚡', name: 'Frühes Aufstehen 5:00', desc: 'Eine halbe Stunde früher als gewohnt. Mehr Zeit für dich.', diff: 'medium', cat: 'mindset' },
+];
+
+let selectedChallenge = null;
+
+function getRandomChallenges() {
+  const today = getToday();
+  if (today.challengePool) return today.challengePool;
+  const shuffled = [...ALL_CHALLENGES].sort(() => Math.random() - 0.5);
+  today.challengePool = shuffled.slice(0, 3).map(c => c.id);
+  save();
+  return today.challengePool;
+}
+
+function renderChallenges() {
+  const today = getToday();
+  const container = document.getElementById('challengeCards');
+  const ids = getRandomChallenges();
+  const challenges = ids.map(id => ALL_CHALLENGES.find(c => c.id === id));
+
+  if (today.activeChallenge) {
+    showActiveChallenge(today.activeChallenge);
+    return;
+  }
+
+  container.innerHTML = '';
+  challenges.forEach(c => {
+    const div = document.createElement('div');
+    div.className = 'challenge-option' + (selectedChallenge === c.id ? ' selected' : '');
+    div.innerHTML = `
+      <div class="challenge-icon">${c.icon}</div>
+      <div class="challenge-name">${c.name}</div>
+      <div class="challenge-desc">${c.desc}</div>
+      <span class="challenge-difficulty diff-${c.diff}">${c.diff.toUpperCase()}</span>
+    `;
+    div.onclick = () => selectChallenge(c.id);
+    container.appendChild(div);
+  });
+
+  document.getElementById('confirmBtn').style.display = selectedChallenge ? 'inline-block' : 'none';
+  document.getElementById('activeChallenge').style.display = 'none';
+}
+
+function selectChallenge(id) {
+  selectedChallenge = id;
+  renderChallenges();
+  document.getElementById('confirmBtn').style.display = 'inline-block';
+}
+
+function confirmChallenge() {
+  if (!selectedChallenge) return;
+  const d = getToday();
+  d.activeChallenge = selectedChallenge;
+  d.challengeCompleted = false;
+  save();
+  showActiveChallenge(selectedChallenge);
+  const c = ALL_CHALLENGES.find(x => x.id === selectedChallenge);
+  document.getElementById('challengeDisplay').textContent = c.icon;
+  document.getElementById('challengeStatus').textContent = c.name;
+  toast('Challenge angenommen! Kein Zurück.');
+}
+
+function showActiveChallenge(id) {
+  const c = ALL_CHALLENGES.find(x => x.id === id);
+  const d = getToday();
+  document.getElementById('challengeCards').style.display = 'none';
+  document.getElementById('confirmBtn').style.display = 'none';
+  document.getElementById('activeChallenge').style.display = 'block';
+  const done = d.challengeCompleted;
+  document.getElementById('activeChallengeContent').innerHTML = `
+    <div style="display:flex; align-items:center; gap:16px; margin-bottom:16px;">
+      <div style="font-size:2.5rem;">${c.icon}</div>
+      <div>
+        <div style="font-family:'Bebas Neue',cursive; font-size:1.4rem; letter-spacing:0.08em;">${c.name}</div>
+        <span class="challenge-difficulty diff-${c.diff}">${c.diff.toUpperCase()}</span>
+        <span class="tag ${c.cat}" style="margin-left:6px;">${c.cat.toUpperCase()}</span>
+      </div>
+    </div>
+    <p style="font-size:0.88rem; color:var(--muted); line-height:1.7; margin-bottom:12px;">${c.desc}</p>
+    ${done ? '<p style="color:var(--success); font-family:\'IBM Plex Mono\',monospace; font-size:0.8rem;">✓ ERLEDIGT — GUT GEMACHT.</p>' : ''}
+  `;
+  if (done) {
+    document.querySelector('#activeChallenge .btn').style.display = 'none';
+    document.getElementById('challengeDisplay').textContent = c.icon;
+    document.getElementById('challengeStatus').textContent = '✓ ' + c.name;
+  }
+}
+
+function completeChallenge() {
+  const d = getToday();
+  d.challengeCompleted = true;
+  save();
+  updateStreak();
+  showActiveChallenge(d.activeChallenge);
+  toast('🔥 CHALLENGE COMPLETED. RESPEKT.');
+}
+
+function resetChallenge() {
+  const d = getToday();
+  delete d.activeChallenge;
+  delete d.challengePool;
+  delete d.challengeCompleted;
+  selectedChallenge = null;
+  save();
+  document.getElementById('challengeCards').style.display = 'grid';
+  renderChallenges();
+  document.getElementById('challengeDisplay').textContent = '—';
+  document.getElementById('challengeStatus').textContent = 'nicht gewählt';
+}
+
+// ==============================
+// GOALS
+// ==============================
+const DEFAULT_GOALS = [
+  { id: 'g1', name: 'KI-Projekt launchen', cat: 'ki', emoji: '🤖' },
+  { id: 'g2', name: 'Gym 4x pro Woche', cat: 'gym', emoji: '💪' },
+  { id: 'g3', name: '30 Tage Box Breathing streak', cat: 'mindset', emoji: '🧘' },
+  { id: 'g4', name: 'Abendjournal täglich', cat: 'mindset', emoji: '📓' },
+  { id: 'g5', name: '2L Wasser täglich', cat: 'health', emoji: '💧' },
+];
+
+function initGoals() {
+  if (!state.goals) state.goals = [...DEFAULT_GOALS];
+  renderGoals();
+}
+
+function renderGoals() {
+  const list = document.getElementById('goalsList');
+  list.innerHTML = '';
+  state.goals.forEach(g => {
+    const div = document.createElement('div');
+    div.className = 'goal-item';
+    div.innerHTML = `
+      <div class="goal-emoji">${g.emoji || '🎯'}</div>
+      <div class="goal-info">
+        <div class="goal-name">${g.name}</div>
+        <span class="tag ${g.cat}">${g.cat.toUpperCase()}</span>
+      </div>
+      <button class="goal-delete" onclick="deleteGoal('${g.id}')">✕</button>
+    `;
+    list.appendChild(div);
+  });
+  document.getElementById('totalGoals').textContent = state.goals.length;
+  const cats = new Set(state.goals.map(g => g.cat));
+  document.getElementById('totalCats').textContent = cats.size;
+}
+
+function toggleAddGoal() {
+  const form = document.getElementById('addGoalForm');
+  form.classList.toggle('visible');
+}
+
+function addGoal() {
+  const name = document.getElementById('goalName').value.trim();
+  const cat = document.getElementById('goalCategory').value;
+  const emoji = document.getElementById('goalEmoji').value.trim() || '🎯';
+  if (!name) { toast('Gib einen Zielnamen ein!'); return; }
+  const goal = { id: 'g' + Date.now(), name, cat, emoji };
+  state.goals.push(goal);
+  save();
+  renderGoals();
+  document.getElementById('goalName').value = '';
+  document.getElementById('goalEmoji').value = '';
+  toggleAddGoal();
+  toast('✓ Ziel hinzugefügt!');
+}
+
+function deleteGoal(id) {
+  state.goals = state.goals.filter(g => g.id !== id);
+  save();
+  renderGoals();
+  toast('Ziel entfernt.');
+}
+
+// ==============================
+// HEALTH METRICS
+// ==============================
+function initHealth() {
+  const d = getToday();
+  if (d.weight) { document.getElementById('weightDisplay').textContent = d.weight; document.getElementById('weightInput').value = d.weight; }
+  if (d.energy) { document.getElementById('energyDisplay').textContent = d.energy; document.getElementById('energyInput').value = d.energy; }
+  if (d.healthNote) document.getElementById('healthNote').value = d.healthNote;
+  initWater();
+}
+
+function saveMetric(key, val) {
+  const d = getToday();
+  d[key] = val;
+  save();
+  if (key === 'weight') document.getElementById('weightDisplay').textContent = val;
+  if (key === 'energy') document.getElementById('energyDisplay').textContent = val;
+}
+
+function initWater() {
+  const d = getToday();
+  if (!d.water) d.water = 0;
+  const container = document.getElementById('waterGlasses');
+  container.innerHTML = '';
+  for (let i = 1; i <= 8; i++) {
+    const btn = document.createElement('button');
+    btn.style.cssText = `font-size:1.6rem; cursor:pointer; background:none; border:none; opacity:${i <= d.water ? '1' : '0.25'}; transition:all 0.15s;`;
+    btn.textContent = '💧';
+    btn.onclick = () => { d.water = i; save(); initWater(); toast(`${i} Gläser! ${i >= 8 ? '🏆 ZIEL ERREICHT!' : ''}`); };
+    container.appendChild(btn);
+  }
+  const pct = Math.round((d.water / 8) * 100);
+  document.getElementById('waterBar').style.width = pct + '%';
+  document.getElementById('waterCount').textContent = `${d.water} / 8 Gläser`;
+  document.getElementById('waterPct').textContent = pct + '%';
+  document.getElementById('waterDisplay').textContent = d.water;
+}
+
+// ==============================
+// GYM
+// ==============================
+let workoutIntensityVal = 3;
+
+function initGym() {
+  const starRow = document.getElementById('workoutIntensity');
+  starRow.innerHTML = '';
+  for (let i = 1; i <= 5; i++) {
+    const s = document.createElement('span');
+    s.className = 'star' + (workoutIntensityVal >= i ? ' active' : '');
+    s.textContent = '★';
+    s.onclick = () => { workoutIntensityVal = i; initGym(); };
+    starRow.appendChild(s);
+  }
+  renderWorkoutHistory();
+}
+
+function logWorkout() {
+  const muscle = document.getElementById('muscleGroup').value;
+  const duration = document.getElementById('workoutDuration').value;
+  if (!duration) { toast('Gib die Dauer ein!'); return; }
+
+  let extraNote = '';
+  if (muscle === 'Boxen') {
+    const runden = document.getElementById('boxRunden').value;
+    const modus = document.getElementById('boxModus').value;
+    const kombis = document.getElementById('boxKombis').value;
+    extraNote = `${modus}${runden?' · '+runden+' Runden':''}${kombis?' · '+kombis:''}`;
+  } else if (muscle === 'Core') {
+    const plank = document.getElementById('corePlank').value;
+    const sets = document.getElementById('coreSets').value;
+    const ueb = document.getElementById('coreUebungen').value;
+    extraNote = `${plank?'Plank '+plank+'s · ':''}${sets?sets+' Sets · ':''}${ueb}`;
+  } else if (muscle === 'Cardio') {
+    const km = document.getElementById('cardioKm').value;
+    const typ = document.getElementById('cardioTyp').value;
+    extraNote = `${typ}${km?' · '+km+'km':''}`;
+  } else {
+    extraNote = document.getElementById('workoutNote').value;
+  }
+
+  if (!state.workouts) state.workouts = [];
+  state.workouts.unshift({
+    id: 'w'+Date.now(),
+    date: todayKey(),
+    muscle, duration: parseInt(duration),
+    note: extraNote,
+    intensity: workoutIntensityVal,
+  });
+  save();
+  document.getElementById('workoutDuration').value = '';
+  if (document.getElementById('workoutNote')) document.getElementById('workoutNote').value = '';
+  if (document.getElementById('boxRunden')) document.getElementById('boxRunden').value = '';
+  if (document.getElementById('boxKombis')) document.getElementById('boxKombis').value = '';
+  if (document.getElementById('corePlank')) document.getElementById('corePlank').value = '';
+  if (document.getElementById('coreUebungen')) document.getElementById('coreUebungen').value = '';
+  if (document.getElementById('cardioKm')) document.getElementById('cardioKm').value = '';
+  workoutIntensityVal = 3;
+  initGym();
+  updateWorkoutStats();
+  toast('💪 Workout gespeichert!');
+}
+
+function renderWorkoutHistory() {
+  const container = document.getElementById('workoutHistory');
+  if (!state.workouts || state.workouts.length === 0) {
+    container.innerHTML = '<p style="color:var(--muted);font-size:0.82rem;">Noch kein Workout. Fang heute an.</p>';
+    return;
+  }
+  container.innerHTML = state.workouts.slice(0, 10).map(w => `
+    <div style="display:flex; align-items:center; gap:14px; padding:12px 0; border-bottom:1px solid var(--border);">
+      <div style="font-family:'IBM Plex Mono',monospace; font-size:0.65rem; color:var(--muted); width:70px;">${w.date}</div>
+      <div style="flex:1;">
+        <div style="font-size:0.88rem; font-weight:600;">${w.muscle} · ${w.duration} Min</div>
+        ${w.note ? `<div style="font-size:0.75rem; color:var(--muted); margin-top:3px;">${w.note}</div>` : ''}
+      </div>
+      <div>${'★'.repeat(w.intensity)}<span style="opacity:0.2;">${'★'.repeat(5 - w.intensity)}</span></div>
+    </div>
+  `).join('');
+}
+
+function updateWorkoutStats() {
+  if (!state.workouts) return;
+  const today = new Date();
+  const weekStart = new Date(today);
+  weekStart.setDate(today.getDate() - today.getDay());
+  const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+
+  const week = state.workouts.filter(w => new Date(w.date) >= weekStart).length;
+  const month = state.workouts.filter(w => new Date(w.date) >= monthStart).length;
+  document.getElementById('weekWorkouts').textContent = week;
+  document.getElementById('monthWorkouts').textContent = month;
+  document.getElementById('totalWorkouts').textContent = state.workouts.length;
+}
+
+// ==============================
+// STREAK
+// ==============================
+function updateStreak() {
+  const streak = state.streak || 0;
+  state.streak = streak + 1;
+  save();
+  document.getElementById('streakBadge').textContent = `🔥 ${state.streak} DAYS`;
+}
+
+function initStreak() {
+  document.getElementById('streakBadge').textContent = `🔥 ${state.streak || 0} DAYS`;
+}
+
+// ==============================
+// INIT
+// ==============================
+function init() {
+  initRoutines();
+  initSleep();
+  initGoals();
+  initHealth();
+  initGym();
+  initStreak();
+  initNotes();
+  initMilestones();
+  initKi();
+  initWeek();
+  initFinanzen();
+  checkStreakWarning();
+  checkEveningReview();
+  renderChallenges();
+  updateWorkoutStats();
+
+  // restore today data displays
+  const d = getToday();
+  if (d.mood !== undefined) {
+    const moods = ['😫', '😕', '😐', '🙂', '🔥'];
+    document.getElementById('moodDisplay').textContent = moods[d.mood];
+  }
+  if (d.sleepHours) document.getElementById('sleepDisplay').textContent = d.sleepHours;
+  if (d.activeChallenge) {
+    const c = ALL_CHALLENGES.find(x => x.id === d.activeChallenge);
+    if (c) { document.getElementById('challengeDisplay').textContent = c.icon; document.getElementById('challengeStatus').textContent = (d.challengeCompleted ? '✓ ' : '') + c.name; }
+  }
+}
+
+// ==============================
+// WORKOUT FORM SWITCHER
+// ==============================
+function switchWorkoutForm(type) {
+  ['Standard','Boxen','Core','Cardio'].forEach(f => {
+    const el = document.getElementById('form'+f);
+    if (el) el.style.display = 'none';
+  });
+  if (type === 'Boxen') document.getElementById('formBoxen').style.display = 'block';
+  else if (type === 'Core') document.getElementById('formCore').style.display = 'block';
+  else if (type === 'Cardio') document.getElementById('formCardio').style.display = 'block';
+  else document.getElementById('formStandard').style.display = 'block';
+}
+
+// ==============================
+// WEEK OVERVIEW
+// ==============================
+function initWeek() {
+  const today = new Date();
+  const day = today.getDay(); // 0=Sun
+  const monday = new Date(today);
+  monday.setDate(today.getDate() - (day === 0 ? 6 : day - 1));
+
+  const days = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    days.push(d.toISOString().split('T')[0]);
+  }
+
+  document.getElementById('weekRange').textContent =
+    monday.toLocaleDateString('de-DE',{day:'2-digit',month:'short'}) + ' – ' +
+    days[6].substring(8) + '. ' + new Date(days[6]).toLocaleDateString('de-DE',{month:'short'});
+
+  // stats
+  let totalRoutine = 0, routineDays = 0, totalSleep = 0, sleepDays = 0, challenges = 0;
+  const weekDaysEl = document.getElementById('weekDays');
+  weekDaysEl.innerHTML = '';
+
+  const allItems = [...MORNING, ...EVENING, ...BREATHING];
+
+  days.forEach(dk => {
+    const d = state[dk] || {};
+    const dayNames = ['Mo','Di','Mi','Do','Fr','Sa','So'];
+    const idx = days.indexOf(dk);
+
+    // routine %
+    let done = 0;
+    ['morning','evening','breathing'].forEach(k => {
+      if (d[k]) Object.values(d[k]).forEach(v => { if(v) done++; });
+    });
+    const pct = allItems.length ? Math.round((done/allItems.length)*100) : 0;
+    if (done > 0) { totalRoutine += pct; routineDays++; }
+    if (d.sleepHours) { totalSleep += parseFloat(d.sleepHours); sleepDays++; }
+    if (d.challengeCompleted) challenges++;
+
+    const isToday = dk === todayKey();
+    const col = pct >= 80 ? 'var(--success)' : pct >= 40 ? 'var(--warn)' : pct > 0 ? 'var(--accent2)' : 'var(--border)';
+
+    const cell = document.createElement('div');
+    cell.style.cssText = `text-align:center; padding:12px 6px; border:1px solid ${isToday ? 'var(--accent)' : 'var(--border)'}; background:${isToday ? 'rgba(232,255,0,0.05)' : 'var(--surface2)'};`;
+    cell.innerHTML = `
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:0.65rem;color:var(--muted);margin-bottom:6px;">${dayNames[idx]}</div>
+      <div style="font-family:'Bebas Neue',cursive;font-size:1.4rem;color:${col};">${pct > 0 ? pct+'%' : '—'}</div>
+      <div style="font-size:0.65rem;color:var(--muted);margin-top:4px;">${d.sleepHours ? d.sleepHours+'h' : '—'}</div>
+    `;
+    weekDaysEl.appendChild(cell);
+  });
+
+  // workouts this week
+  const wkWorkouts = (state.workouts||[]).filter(w => days.includes(w.date)).length;
+  document.getElementById('wkRoutine').textContent = routineDays ? Math.round(totalRoutine/routineDays)+'%' : '—';
+  document.getElementById('wkSleep').textContent = sleepDays ? (totalSleep/sleepDays).toFixed(1) : '—';
+  document.getElementById('wkWorkouts').textContent = wkWorkouts;
+  document.getElementById('wkChallenges').textContent = challenges;
+}
+
+// ==============================
+// MILESTONES
+// ==============================
+const DEFAULT_MILESTONES = [
+  { id:'ms1', title:'Erste 4 Wochen Gym durchhalten', cat:'gym', timeframe:'4W', emoji:'💪', done:false },
+  { id:'ms2', title:'10 Boxen-Sessions absolviert', cat:'boxen', timeframe:'4W', emoji:'🥊', done:false },
+  { id:'ms3', title:'2 Min Plank halten', cat:'core', timeframe:'8W', emoji:'🎯', done:false },
+  { id:'ms4', title:'Push/Pull/Legs Zyklus 8 Wochen', cat:'gym', timeframe:'8W', emoji:'🏋️', done:false },
+  { id:'ms5', title:'KI-Projekt erste Version live', cat:'ki', timeframe:'3M', emoji:'🤖', done:false },
+  { id:'ms6', title:'30 Tage Box Breathing Streak', cat:'mindset', timeframe:'4W', emoji:'🧘', done:false },
+  { id:'ms7', title:'100kg Bankdrücken', cat:'gym', timeframe:'6M', emoji:'🏆', done:false },
+  { id:'ms8', title:'Sparring-Session absolviert', cat:'boxen', timeframe:'3M', emoji:'🥋', done:false },
+  { id:'ms9', title:'KI-Projekt erste zahlenden Nutzer', cat:'ki', timeframe:'6M', emoji:'💰', done:false },
+  { id:'ms10', title:'Körperfett sichtbar reduziert', cat:'health', timeframe:'3M', emoji:'❤️', done:false },
+];
+
+const TF_LABEL = { '4W':'4 Wochen', '8W':'8 Wochen', '3M':'3 Monate', '6M':'6 Monate', '1J':'1 Jahr' };
+const TF_ORDER = { '4W':1,'8W':2,'3M':3,'6M':4,'1J':5 };
+
+function initMilestones() {
+  if (!state.milestones) state.milestones = [...DEFAULT_MILESTONES];
+  renderMilestones();
+}
+
+function renderMilestones() {
+  const sorted = [...state.milestones].sort((a,b) => (TF_ORDER[a.timeframe]||9) - (TF_ORDER[b.timeframe]||9));
+  const groups = {};
+  sorted.forEach(m => {
+    if (!groups[m.timeframe]) groups[m.timeframe] = [];
+    groups[m.timeframe].push(m);
+  });
+
+  const container = document.getElementById('milestonesList');
+  container.innerHTML = '';
+
+  Object.keys(groups).sort((a,b)=>TF_ORDER[a]-TF_ORDER[b]).forEach(tf => {
+    const groupDiv = document.createElement('div');
+    groupDiv.style.marginBottom = '20px';
+    groupDiv.innerHTML = `<div style="font-family:'IBM Plex Mono',monospace;font-size:0.7rem;letter-spacing:0.25em;color:var(--accent);margin-bottom:10px;text-transform:uppercase;">⏱ ${TF_LABEL[tf]||tf}</div>`;
+
+    groups[tf].forEach(m => {
+      const item = document.createElement('div');
+      item.style.cssText = `display:flex;align-items:center;gap:14px;padding:14px;margin-bottom:8px;background:var(--surface2);border:1px solid ${m.done?'var(--success)':'var(--border)'};${m.done?'opacity:0.6;':''}`;
+      item.innerHTML = `
+        <div style="font-size:1.4rem;">${m.emoji||'🎯'}</div>
+        <div style="flex:1;">
+          <div style="font-size:0.88rem;${m.done?'text-decoration:line-through;color:var(--muted);':''}">${m.title}</div>
+          <span class="tag ${m.cat}" style="margin-top:5px;display:inline-block;">${m.cat.toUpperCase()}</span>
+        </div>
+        <button onclick="toggleMilestone('${m.id}')" style="background:${m.done?'var(--success)':'none'};border:2px solid ${m.done?'var(--success)':'var(--muted)'};color:${m.done?'#000':'var(--muted)'};width:28px;height:28px;cursor:pointer;font-size:0.8rem;flex-shrink:0;">${m.done?'✓':''}</button>
+        <button onclick="deleteMilestone('${m.id}')" class="goal-delete">✕</button>
+      `;
+      groupDiv.appendChild(item);
+    });
+    container.appendChild(groupDiv);
+  });
+}
+
+function toggleMilestone(id) {
+  const m = state.milestones.find(x=>x.id===id);
+  if (!m) return;
+  m.done = !m.done;
+  save();
+  renderMilestones();
+  if (m.done) toast('🏆 MEILENSTEIN ERREICHT!');
+}
+
+function deleteMilestone(id) {
+  state.milestones = state.milestones.filter(x=>x.id!==id);
+  save();
+  renderMilestones();
+}
+
+function addMilestone() {
+  const title = document.getElementById('msTitle').value.trim();
+  if (!title) { toast('Gib einen Titel ein!'); return; }
+  const m = {
+    id: 'ms'+Date.now(),
+    title,
+    cat: document.getElementById('msCategory').value,
+    timeframe: document.getElementById('msTimeframe').value,
+    emoji: document.getElementById('msEmoji').value.trim() || '🎯',
+    done: false,
+  };
+  state.milestones.push(m);
+  save();
+  renderMilestones();
+  document.getElementById('msTitle').value = '';
+  document.getElementById('msEmoji').value = '';
+  toast('✓ Meilenstein hinzugefügt!');
+}
+
+// ==============================
+// BREATHING TIMER
+// ==============================
+const PHASES = [
+  { name:'EINATMEN', emoji:'😮‍💨', secs:4 },
+  { name:'HALTEN',   emoji:'😶',   secs:4 },
+  { name:'AUSATMEN', emoji:'😮',   secs:4 },
+  { name:'HALTEN',   emoji:'😶',   secs:4 },
+];
+
+let breathInterval = null;
+let breathPhaseIdx = 0;
+let breathSecLeft = 4;
+let breathRound = 0;
+let breathRunning = false;
+
+function toggleBreathing() {
+  if (breathRunning) {
+    clearInterval(breathInterval);
+    breathRunning = false;
+    breathPhaseIdx = 0; breathSecLeft = 4; breathRound = 0;
+    document.getElementById('breathBtn').textContent = 'START →';
+    document.getElementById('breathPhase').textContent = 'BEREIT';
+    document.getElementById('breathCount').textContent = '4';
+    document.getElementById('breathRound').textContent = 'RUNDE 0 / 4';
+    document.getElementById('breathCircle').style.strokeDashoffset = '565';
+    document.getElementById('breathEmoji').textContent = '😮‍💨';
+    return;
+  }
+  breathRunning = true;
+  breathRound = 1;
+  breathPhaseIdx = 0;
+  breathSecLeft = PHASES[0].secs;
+  document.getElementById('breathBtn').textContent = 'STOPP';
+  updateBreathUI();
+  breathInterval = setInterval(breathTick, 1000);
+}
+
+function breathTick() {
+  breathSecLeft--;
+  if (breathSecLeft <= 0) {
+    breathPhaseIdx++;
+    if (breathPhaseIdx >= PHASES.length) {
+      breathPhaseIdx = 0;
+      breathRound++;
+      if (breathRound > 4) {
+        clearInterval(breathInterval);
+        breathRunning = false;
+        document.getElementById('breathPhase').textContent = 'FERTIG 🔥';
+        document.getElementById('breathCount').textContent = '✓';
+        document.getElementById('breathRound').textContent = '4 / 4 RUNDEN';
+        document.getElementById('breathBtn').textContent = 'NOCHMAL';
+        document.getElementById('breathEmoji').textContent = '🧘';
+        toast('Box Breathing abgeschlossen. Handy weglegen.');
+        return;
+      }
+    }
+    breathSecLeft = PHASES[breathPhaseIdx].secs;
+  }
+  updateBreathUI();
+}
+
+function updateBreathUI() {
+  const phase = PHASES[breathPhaseIdx];
+  const total = phase.secs;
+  const remaining = breathSecLeft;
+  // Circle: full at start (4), empty at end (0)
+  const pct = (total - remaining) / total;
+  const circumference = 565;
+  document.getElementById('breathPhase').textContent = phase.name;
+  document.getElementById('breathCount').textContent = remaining;
+  document.getElementById('breathRound').textContent = `RUNDE ${breathRound} / 4`;
+  document.getElementById('breathEmoji').textContent = phase.emoji;
+  // Start full (offset=0), drain to empty (offset=565)
+  document.getElementById('breathCircle').style.strokeDashoffset = circumference * pct;
+}
+
+// ==============================
+// KI TRACKER
+// ==============================
+function initKi() {
+  if (!state.kiSessions) state.kiSessions = [];
+  updateKiStats();
+  renderKiHistory();
+}
+
+function logKiSession() {
+  const duration = document.getElementById('kiDuration').value;
+  const focus = document.getElementById('kiFocus').value;
+  const note = document.getElementById('kiNote').value.trim();
+  if (!duration) { toast('Gib die Dauer ein!'); return; }
+  state.kiSessions.unshift({
+    id: 'ki'+Date.now(),
+    date: todayKey(),
+    duration: parseInt(duration),
+    focus, note,
+  });
+  save();
+  document.getElementById('kiDuration').value = '';
+  document.getElementById('kiNote').value = '';
+  updateKiStats();
+  renderKiHistory();
+  toast('💻 KI-Session gespeichert!');
+}
+
+function updateKiStats() {
+  const sessions = state.kiSessions || [];
+  const today = new Date();
+  const day = today.getDay();
+  const monday = new Date(today);
+  monday.setDate(today.getDate() - (day===0?6:day-1));
+  const weekSessions = sessions.filter(s => new Date(s.date) >= monday);
+  const totalMins = sessions.reduce((a,s) => a + (s.duration||0), 0);
+  document.getElementById('kiSessions').textContent = sessions.length;
+  document.getElementById('kiWeek').textContent = weekSessions.length;
+  document.getElementById('kiHours').textContent = Math.round(totalMins/60*10)/10;
+}
+
+function renderKiHistory() {
+  const container = document.getElementById('kiHistory');
+  const sessions = state.kiSessions || [];
+  if (!sessions.length) { container.innerHTML = '<p style="color:var(--muted);font-size:0.82rem;">Noch keine Session. Fang heute an.</p>'; return; }
+  container.innerHTML = sessions.slice(0,10).map(s => `
+    <div style="display:flex;align-items:flex-start;gap:14px;padding:12px 0;border-bottom:1px solid var(--border);">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:0.65rem;color:var(--muted);width:70px;flex-shrink:0;">${s.date}</div>
+      <div style="flex:1;">
+        <div style="font-size:0.88rem;font-weight:600;">${s.focus} · ${s.duration} Min</div>
+        ${s.note?`<div style="font-size:0.75rem;color:var(--muted);margin-top:3px;">${s.note}</div>`:''}
+      </div>
+    </div>
+  `).join('');
+}
+
+// patch logWorkout to handle new types
+
+// ==============================
+// FINANZEN
+// ==============================
+function initFinanzen() {
+  if (!state.fin) state.fin = { entries: [], goal: 0 };
+  if (state.fin.goal) document.getElementById('finGoalInput').value = state.fin.goal;
+  renderFinanzen();
+}
+
+function addFinEntry() {
+  const type = document.getElementById('finType').value;
+  const cat = document.getElementById('finCat').value;
+  const amount = parseFloat(document.getElementById('finAmount').value);
+  const desc = document.getElementById('finDesc').value.trim();
+  if (!amount || amount <= 0) { toast('Betrag eingeben!'); return; }
+  if (!state.fin) state.fin = { entries: [], goal: 0 };
+  state.fin.entries.unshift({ id: 'f'+Date.now(), date: todayKey(), type, cat, amount, desc });
+  state.lastEntry = todayKey();
+  save();
+  document.getElementById('finAmount').value = '';
+  document.getElementById('finDesc').value = '';
+  renderFinanzen();
+  toast(type === 'income' ? '💰 Einnahme!' : '💸 Ausgabe!');
+}
+
+function saveFinGoal(val) {
+  if (!state.fin) state.fin = { entries: [], goal: 0 };
+  state.fin.goal = parseFloat(val) || 0;
+  save();
+  renderFinanzen();
+}
+
+function deleteFinEntry(id) {
+  state.fin.entries = state.fin.entries.filter(e => e.id !== id);
+  save();
+  renderFinanzen();
+}
+
+function renderFinanzen() {
+  const fin = state.fin || { entries: [], goal: 0 };
+  const today = todayKey();
+  const month = today.substring(0, 7);
+  const todayIn  = fin.entries.filter(e => e.date === today && e.type === 'income').reduce((a,e) => a+e.amount, 0);
+  const todayOut = fin.entries.filter(e => e.date === today && e.type === 'expense').reduce((a,e) => a+e.amount, 0);
+  const monthIn  = fin.entries.filter(e => e.date.startsWith(month) && e.type === 'income').reduce((a,e) => a+e.amount, 0);
+  const monthOut = fin.entries.filter(e => e.date.startsWith(month) && e.type === 'expense').reduce((a,e) => a+e.amount, 0);
+  const balance  = monthIn - monthOut;
+  document.getElementById('finTodayIn').textContent  = todayIn.toFixed(0)+'€';
+  document.getElementById('finTodayOut').textContent = todayOut.toFixed(0)+'€';
+  document.getElementById('finMonthIn').textContent  = monthIn.toFixed(0)+'€';
+  document.getElementById('finMonthOut').textContent = monthOut.toFixed(0)+'€';
+  document.getElementById('finBalance').textContent  = (balance >= 0 ? '+' : '') + balance.toFixed(0)+'€';
+  document.getElementById('finBalance').style.color  = balance >= 0 ? 'var(--success)' : 'var(--accent2)';
+  const goal = fin.goal || 0;
+  const pct = goal > 0 ? Math.min(100, Math.round((monthIn/goal)*100)) : 0;
+  document.getElementById('finGoalBar').style.width = pct+'%';
+  document.getElementById('finGoalLabel').textContent = monthIn.toFixed(0)+'€ / '+goal+'€';
+  document.getElementById('finGoalPct').textContent = pct+'%';
+  const hist = document.getElementById('finHistory');
+  if (!fin.entries.length) { hist.innerHTML = '<p style="color:var(--muted);font-size:0.82rem;">Noch keine Einträge.</p>'; return; }
+  hist.innerHTML = fin.entries.slice(0,15).map(e => `
+    <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);">
+      <span style="font-size:1.1rem;">${e.type==='income'?'💰':'💸'}</span>
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:0.62rem;color:var(--muted);width:70px;flex-shrink:0;">${e.date}</span>
+      <span style="flex:1;font-size:0.85rem;">${e.desc||e.cat}</span>
+      <span style="font-family:'Bebas Neue',cursive;font-size:1.1rem;color:${e.type==='income'?'var(--success)':'var(--accent2)'};">${e.type==='income'?'+':'-'}${e.amount.toFixed(0)}€</span>
+      <button class="goal-delete" onclick="deleteFinEntry('${e.id}')">✕</button>
+    </div>
+  `).join('');
+}
+
+// ==============================
+// AAR (After Action Report)
+// ==============================
+let aarPendingNote = null;
+
+function triggerAAR(noteData) {
+  aarPendingNote = noteData;
+  const modal = document.getElementById('aarModal');
+  modal.style.display = 'flex';
+  ['aarWhat','aarWhy','aarDiff','aarNext'].forEach(id => document.getElementById(id).value = '');
+}
+
+function submitAAR() {
+  const what = document.getElementById('aarWhat').value.trim();
+  const why  = document.getElementById('aarWhy').value.trim();
+  const diff = document.getElementById('aarDiff').value.trim();
+  const next = document.getElementById('aarNext').value.trim();
+  if (!what || !why || !diff || !next) { toast('Alle 4 Felder ausfüllen!'); return; }
+  if (aarPendingNote) {
+    if (!state.notes) state.notes = [];
+    aarPendingNote.aar = { what, why, diff, next };
+    state.notes.unshift(aarPendingNote);
+    save();
+    renderNotes();
+    aarPendingNote = null;
+  }
+  document.getElementById('aarModal').style.display = 'none';
+  toast('AAR gespeichert.');
+}
+
+// ==============================
+// ABEND REVIEW (22:00 Pflicht)
+// ==============================
+function checkEveningReview() {
+  const hour = new Date().getHours();
+  const d = getToday();
+  if (hour >= 22 && !d.reviewDone) showReviewModal();
+}
+
+function showReviewModal() {
+  const d = getToday();
+  const allItems = [...MORNING, ...EVENING, ...BREATHING];
+  let done = 0;
+  ['morning','evening','breathing'].forEach(k => { if (d[k]) Object.values(d[k]).forEach(v => { if(v) done++; }); });
+  const pct = Math.round((done/allItems.length)*100);
+  const workoutsToday = (state.workouts||[]).filter(w => w.date === todayKey()).length;
+  document.getElementById('reviewSummary').innerHTML =
+    `ROUTINE: ${pct}%<br>SCHLAF: ${d.sleepHours||'—'}h<br>STIMMUNG: ${['😫','😕','😐','🙂','🔥'][d.mood]||'—'}<br>WORKOUTS: ${workoutsToday}<br>WASSER: ${d.water||0}/8<br>CHALLENGE: ${d.challengeCompleted?'✓':'✗'}`;
+  document.getElementById('reviewModal').style.display = 'flex';
+}
+
+function submitReview() {
+  const good   = document.getElementById('reviewGood').value.trim();
+  const better = document.getElementById('reviewBetter').value.trim();
+  if (!good || !better) { toast('Beide Felder ausfüllen!'); return; }
+  const d = getToday();
+  d.reviewDone = true;
+  d.reviewGood = good;
+  d.reviewBetter = better;
+  state.lastEntry = todayKey();
+  save();
+  document.getElementById('reviewModal').style.display = 'none';
+  runKIBewertung();
+}
+
+// ==============================
+// KI TAGESBEWERTUNG
+// ==============================
+async function runKIBewertung() {
+  const modal = document.getElementById('kiReviewModal');
+  modal.style.display = 'flex';
+  document.getElementById('kiReviewContent').innerHTML = '<div style="color:var(--muted);font-family:\'IBM Plex Mono\',monospace;font-size:0.75rem;">⏳ Analysiere...</div>';
+  const d = getToday();
+  const allItems = [...MORNING, ...EVENING, ...BREATHING];
+  let done = 0;
+  ['morning','evening','breathing'].forEach(k => { if (d[k]) Object.values(d[k]).forEach(v => { if(v) done++; }); });
+  const pct = Math.round((done/allItems.length)*100);
+  const workoutsToday = (state.workouts||[]).filter(w => w.date === todayKey());
+  const moods = ['sehr schlecht','schlecht','neutral','gut','ausgezeichnet'];
+  const month = todayKey().substring(0,7);
+  const fin = state.fin || { entries:[], goal:0 };
+  const monthIn  = fin.entries.filter(e => e.date.startsWith(month) && e.type==='income').reduce((a,e)=>a+e.amount,0);
+  const monthOut = fin.entries.filter(e => e.date.startsWith(month) && e.type==='expense').reduce((a,e)=>a+e.amount,0);
+  const fails = (state.notes||[]).filter(n => n.date === todayKey() && n.type === 'fail').length;
+  const wins  = (state.notes||[]).filter(n => n.date === todayKey() && n.type === 'win').length;
+
+  const prompt = `Du bist Dimitris persönlicher Coach – direkt, hart, ehrlich. Analysiere seinen heutigen Tag.
+
+TAGESDATEN:
+- Routine: ${pct}% erledigt
+- Schlaf: ${d.sleepHours||'nicht eingetragen'}h, Qualität: ${d.sleepQuality||'—'}/5
+- Stimmung: ${d.mood !== undefined ? moods[d.mood] : 'nicht eingetragen'}
+- Workouts: ${workoutsToday.length > 0 ? workoutsToday.map(w=>w.muscle+' '+w.duration+'min').join(', ') : 'keins'}
+- Wasser: ${d.water||0}/8 Gläser
+- Challenge: ${d.challengeCompleted ? 'erledigt' : 'nicht erledigt'}
+- Wins: ${wins}, Fails: ${fails}
+- Finanzen Monat: Einnahmen ${monthIn}€, Ausgaben ${monthOut}€
+- Was gut war: "${d.reviewGood||'—'}"
+- Morgen besser: "${d.reviewBetter||'—'}"
+
+Antworte auf Deutsch. Format:
+SCORE: X/10
+BEWERTUNG:
+[2-3 ehrliche Sätze. Kein Coaching-Sprech.]
+MORGEN:
+1. [konkrete Aktion]
+2. [konkrete Aktion]
+3. [konkrete Aktion]`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 800, messages: [{ role: 'user', content: prompt }] })
+    });
+    const data = await res.json();
+    const text = data.content?.[0]?.text || 'Fehler.';
+    const formatted = text
+      .replace(/SCORE: (\d+)\/10/g, '<div style="font-family:\'Bebas Neue\',cursive;font-size:2.5rem;color:var(--accent);margin-bottom:12px;">SCORE: $1/10</div>')
+      .replace(/BEWERTUNG:/g, '<div style="font-family:\'IBM Plex Mono\',monospace;font-size:0.7rem;letter-spacing:0.2em;color:var(--muted);margin:16px 0 6px;">BEWERTUNG</div>')
+      .replace(/MORGEN:/g, '<div style="font-family:\'IBM Plex Mono\',monospace;font-size:0.7rem;letter-spacing:0.2em;color:var(--accent);margin:16px 0 6px;">MORGEN — 3 AKTIONEN</div>')
+      .replace(/\n/g, '<br>');
+    document.getElementById('kiReviewContent').innerHTML = formatted;
+    d.kiScore = text.match(/SCORE: (\d+)/)?.[1] || null;
+    save();
+  } catch(e) {
+    document.getElementById('kiReviewContent').innerHTML = '<p style="color:var(--accent2);">Kein Internet – du weißt selbst was du besser machen kannst.</p>';
+  }
+}
+
+function closeKiReview() {
+  document.getElementById('kiReviewModal').style.display = 'none';
+  toast('Gute Nacht.');
+}
+
+// ==============================
+// STREAK WARNING
+// ==============================
+function checkStreakWarning() {
+  if (!state.lastEntry || state.streakWarningDismissed === todayKey()) return;
+  const last = new Date(state.lastEntry);
+  const diff = Math.floor((new Date() - last) / (1000*60*60*24));
+  if (diff >= 3) document.getElementById('streakWarning').style.display = 'flex';
+}
+
+function dismissStreakWarning() {
+  if (!document.getElementById('streakAARText').value.trim()) { toast('Schreib etwas.'); return; }
+  state.streakWarningDismissed = todayKey();
+  state.lastEntry = todayKey();
+  save();
+  document.getElementById('streakWarning').style.display = 'none';
+  toast('Gut. Bleib dabei.');
+}
+
+setInterval(checkEveningReview, 60000);
+
+const NOTE_TYPE_META = {
+  win:     { label: 'Win',         color: 'var(--success)', icon: '✅' },
+  fail:    { label: 'Fail',        color: 'var(--accent2)', icon: '❌' },
+  insight: { label: 'Erkenntnis',  color: 'var(--warn)',    icon: '💡' },
+  repair:  { label: 'Repariert',   color: '#60a5fa',        icon: '🔧' },
+  record:  { label: 'Rekord',      color: 'var(--accent)',  icon: '🏆' },
+  misc:    { label: 'Sonstiges',   color: 'var(--muted)',   icon: '📌' },
+};
+
+let activeNoteFilter = 'all';
+
+function addNote() {
+  const title = document.getElementById('noteTitle').value.trim();
+  const body  = document.getElementById('noteBody').value.trim();
+  const type  = document.getElementById('noteType').value;
+  const cat   = document.getElementById('noteCategory').value;
+  if (!title) { toast('Gib einen Titel ein!'); return; }
+  const noteData = { id: 'n'+Date.now(), date: todayKey(), title, body, type, cat };
+  if (type === 'fail') {
+    document.getElementById('noteTitle').value = '';
+    document.getElementById('noteBody').value = '';
+    triggerAAR(noteData);
+    return;
+  }
+  if (!state.notes) state.notes = [];
+  state.notes.unshift(noteData);
+  state.lastEntry = todayKey();
+  save();
+  document.getElementById('noteTitle').value = '';
+  document.getElementById('noteBody').value = '';
+  renderNotes();
+  toast('✓ Notiz gespeichert!');
+}
+
+function deleteNote(id) {
+  state.notes = (state.notes || []).filter(n => n.id !== id);
+  save();
+  renderNotes();
+  toast('Notiz gelöscht.');
+}
+
+function filterNotes(filter) {
+  activeNoteFilter = filter;
+  // highlight active filter btn
+  document.querySelectorAll('#noteFilters button').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  renderNotes();
+}
+
+function renderNotes() {
+  const notes = state.notes || [];
+  // stats
+  document.getElementById('noteTotal').textContent  = notes.length;
+  document.getElementById('noteWins').textContent   = notes.filter(n => n.type === 'win').length;
+  document.getElementById('noteFails').textContent  = notes.filter(n => n.type === 'fail').length;
+  document.getElementById('noteInsights').textContent = notes.filter(n => n.type === 'insight').length;
+
+  const f = activeNoteFilter;
+  const filtered = notes.filter(n => {
+    if (f === 'all') return true;
+    return n.type === f || n.cat === f;
+  });
+
+  const container = document.getElementById('notesList');
+  if (filtered.length === 0) {
+    container.innerHTML = '<div class="card" style="color:var(--muted);font-size:0.83rem;">Keine Notizen in dieser Kategorie.</div>';
+    return;
+  }
+
+  container.innerHTML = filtered.map(n => {
+    const m = NOTE_TYPE_META[n.type] || NOTE_TYPE_META.misc;
+    const aarBlock = n.aar ? `
+      <div style="margin-top:12px;padding:12px;background:rgba(255,60,0,0.06);border:1px solid rgba(255,60,0,0.2);">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:0.62rem;letter-spacing:0.2em;color:var(--accent2);margin-bottom:8px;">AFTER ACTION REPORT</div>
+        <div style="font-size:0.78rem;color:var(--muted);line-height:1.7;">
+          <b style="color:var(--text);">Was:</b> ${n.aar.what}<br>
+          <b style="color:var(--text);">Warum:</b> ${n.aar.why}<br>
+          <b style="color:var(--text);">Anders:</b> ${n.aar.diff}<br>
+          <b style="color:var(--accent);">Morgen:</b> ${n.aar.next}
+        </div>
+      </div>` : '';
+    return `
+    <div class="card" style="margin-bottom:12px; border-left:3px solid ${m.color};">
+      <div style="display:flex; align-items:flex-start; gap:12px;">
+        <div style="font-size:1.3rem; flex-shrink:0;">${m.icon}</div>
+        <div style="flex:1;">
+          <div style="display:flex; align-items:center; gap:10px; margin-bottom:6px; flex-wrap:wrap;">
+            <span style="font-family:'Bebas Neue',cursive; font-size:1rem; letter-spacing:0.06em;">${n.title}</span>
+            <span class="tag ${n.cat}">${n.cat.toUpperCase()}</span>
+            <span style="font-family:'IBM Plex Mono',monospace; font-size:0.6rem; color:var(--muted);">${n.date}</span>
+          </div>
+          ${n.body ? `<p style="font-size:0.82rem; color:var(--muted); line-height:1.6;">${n.body}</p>` : ''}
+          ${aarBlock}
+        </div>
+        <button class="goal-delete" onclick="deleteNote('${n.id}')">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function initNotes() {
+  renderNotes();
+}
+
+init();
+</script>
+</body>
+</html>
