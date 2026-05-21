@@ -618,6 +618,7 @@
   <button class="nav-tab" onclick="showSection('milestones',this)">MEILENSTEINE</button>
   <button class="nav-tab" onclick="showSection('breathtimer',this)">BREATHING</button>
   <button class="nav-tab" onclick="showSection('ki',this)">KI-PROJEKT</button>
+  <button class="nav-tab" onclick="showSection('data',this)">DATEN</button>
 </nav>
 
 <main>
@@ -712,6 +713,50 @@
       <hr class="divider">
       <button class="btn" onclick="completeChallenge()">✓ ERLEDIGT — NEXT LEVEL</button>
       <button class="btn btn-ghost" onclick="resetChallenge()" style="margin-left:10px;">NEUE CHALLENGES</button>
+    </div>
+
+    <!-- EIGENE CHALLENGES VERWALTEN -->
+    <div class="card" style="margin-top:16px;">
+      <div class="card-title">📋 CHALLENGE BIBLIOTHEK</div>
+      <p style="font-size:0.8rem; color:var(--muted); margin-bottom:16px; line-height:1.6;">Alle Challenges. Füge eigene hinzu oder lösche welche.</p>
+      <div id="challengeLibrary" style="margin-bottom:16px;"></div>
+      <hr class="divider">
+      <div style="font-family:'Bebas Neue',cursive;font-size:1rem;letter-spacing:0.08em;color:var(--accent);margin-bottom:12px;">+ EIGENE CHALLENGE</div>
+      <div class="form-row" style="margin-bottom:12px;">
+        <div>
+          <span class="form-label">NAME</span>
+          <input type="text" id="customChallengeName" placeholder="z.B. 50 Burpees">
+        </div>
+        <div>
+          <span class="form-label">EMOJI</span>
+          <input type="text" id="customChallengeIcon" placeholder="🔥" style="max-width:80px;">
+        </div>
+      </div>
+      <div style="margin-bottom:12px;">
+        <span class="form-label">BESCHREIBUNG</span>
+        <textarea id="customChallengeDesc" rows="2" placeholder="Was genau ist die Aufgabe?" style="resize:none;"></textarea>
+      </div>
+      <div class="form-row" style="margin-bottom:16px;">
+        <div>
+          <span class="form-label">SCHWIERIGKEIT</span>
+          <select id="customChallengeDiff">
+            <option value="easy">EASY</option>
+            <option value="medium" selected>MEDIUM</option>
+            <option value="hard">HARD</option>
+          </select>
+        </div>
+        <div>
+          <span class="form-label">KATEGORIE</span>
+          <select id="customChallengeCat">
+            <option value="mindset">🧠 Mindset</option>
+            <option value="gym">💪 Gym</option>
+            <option value="health">❤️ Health</option>
+            <option value="ki">🤖 KI</option>
+            <option value="business">💼 Business</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn" onclick="addCustomChallenge()">CHALLENGE HINZUFÜGEN →</button>
     </div>
   </div>
 
@@ -1267,6 +1312,45 @@
     </div>
   </div>
 
+  <!-- DATEN -->
+  <div class="section" id="section-data">
+    <div class="section-header">
+      <div class="section-title">DATEN</div>
+      <div class="section-date">Backup & Restore</div>
+    </div>
+
+    <div class="grid-2" style="margin-bottom:20px;">
+      <div class="card">
+        <div class="card-title">📤 EXPORT</div>
+        <p style="font-size:0.82rem; color:var(--muted); line-height:1.6; margin-bottom:20px;">
+          Alle deine Daten als JSON-Datei herunterladen. Sichere das regelmäßig – besonders vor Browser-Updates oder Gerätewechsel.
+        </p>
+        <div id="exportInfo" style="font-family:'IBM Plex Mono',monospace; font-size:0.72rem; color:var(--muted); margin-bottom:16px; padding:12px; background:var(--surface2); border:1px solid var(--border);"></div>
+        <button class="btn" onclick="exportData()">⬇ DATEN EXPORTIEREN</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📥 IMPORT</div>
+        <p style="font-size:0.82rem; color:var(--muted); line-height:1.6; margin-bottom:20px;">
+          Backup wiederherstellen. <span style="color:var(--accent2);">Achtung: überschreibt alle aktuellen Daten.</span> Nur eigene Backup-Dateien importieren.
+        </p>
+        <div style="margin-bottom:16px;">
+          <span class="form-label">JSON BACKUP DATEI</span>
+          <input type="file" id="importFile" accept=".json" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px;width:100%;font-size:0.82rem;cursor:pointer;">
+        </div>
+        <button class="btn btn-danger" onclick="importData()">⬆ DATEN IMPORTIEREN</button>
+      </div>
+    </div>
+
+    <div class="card" style="border-color:var(--accent2);">
+      <div class="card-title" style="color:var(--accent2);">⚠ DANGER ZONE</div>
+      <p style="font-size:0.82rem; color:var(--muted); line-height:1.6; margin-bottom:20px;">
+        Alle Daten unwiderruflich löschen. Kein Undo. Exportiere zuerst.
+      </p>
+      <button class="btn btn-danger" onclick="confirmReset()">🗑 ALLE DATEN LÖSCHEN</button>
+    </div>
+  </div>
+
 </main>
 
 <!-- AAR MODAL -->
@@ -1385,6 +1469,7 @@ function showSection(id, el) {
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
   document.getElementById('section-' + id).classList.add('active');
   if (el) el.classList.add('active');
+  if (id === 'data') updateExportInfo();
 }
 
 // ==============================
@@ -1536,7 +1621,8 @@ let selectedChallenge = null;
 function getRandomChallenges() {
   const today = getToday();
   if (today.challengePool) return today.challengePool;
-  const shuffled = [...ALL_CHALLENGES].sort(() => Math.random() - 0.5);
+  const pool = getAllChallenges();
+  const shuffled = [...pool].sort(() => Math.random() - 0.5);
   today.challengePool = shuffled.slice(0, 3).map(c => c.id);
   save();
   return today.challengePool;
@@ -1546,10 +1632,11 @@ function renderChallenges() {
   const today = getToday();
   const container = document.getElementById('challengeCards');
   const ids = getRandomChallenges();
-  const challenges = ids.map(id => ALL_CHALLENGES.find(c => c.id === id));
+  const challenges = ids.map(id => getAllChallenges().find(c => c.id === id)).filter(Boolean);
 
   if (today.activeChallenge) {
     showActiveChallenge(today.activeChallenge);
+    renderChallengeLibrary();
     return;
   }
 
@@ -1569,6 +1656,7 @@ function renderChallenges() {
 
   document.getElementById('confirmBtn').style.display = selectedChallenge ? 'inline-block' : 'none';
   document.getElementById('activeChallenge').style.display = 'none';
+  renderChallengeLibrary();
 }
 
 function selectChallenge(id) {
@@ -1584,14 +1672,14 @@ function confirmChallenge() {
   d.challengeCompleted = false;
   save();
   showActiveChallenge(selectedChallenge);
-  const c = ALL_CHALLENGES.find(x => x.id === selectedChallenge);
+  const c = getAllChallenges().find(x => x.id === selectedChallenge);
   document.getElementById('challengeDisplay').textContent = c.icon;
   document.getElementById('challengeStatus').textContent = c.name;
   toast('Challenge angenommen! Kein Zurück.');
 }
 
 function showActiveChallenge(id) {
-  const c = ALL_CHALLENGES.find(x => x.id === id);
+  const c = getAllChallenges().find(x => x.id === id);
   const d = getToday();
   document.getElementById('challengeCards').style.display = 'none';
   document.getElementById('confirmBtn').style.display = 'none';
@@ -2516,6 +2604,115 @@ function renderNotes() {
 
 function initNotes() {
   renderNotes();
+}
+
+// ==============================
+// CUSTOM CHALLENGES
+// ==============================
+function getAllChallenges() {
+  const custom = state.customChallenges || [];
+  return [...ALL_CHALLENGES, ...custom];
+}
+
+function renderChallengeLibrary() {
+  const all = getAllChallenges();
+  const container = document.getElementById('challengeLibrary');
+  if (!container) return;
+  container.innerHTML = all.map(c => {
+    const isCustom = !ALL_CHALLENGES.find(x => x.id === c.id);
+    return `
+    <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);">
+      <span style="font-size:1.3rem;">${c.icon}</span>
+      <div style="flex:1;">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:0.8rem;color:var(--text);">${c.name}</div>
+        <div style="font-size:0.7rem;color:var(--muted);margin-top:2px;">${c.desc}</div>
+        <span style="font-size:0.6rem;font-family:'IBM Plex Mono',monospace;padding:2px 7px;margin-top:4px;display:inline-block;
+          ${c.diff==='hard'?'background:rgba(255,60,0,0.15);color:var(--accent2);border:1px solid var(--accent2);':
+            c.diff==='medium'?'background:rgba(255,145,0,0.15);color:var(--warn);border:1px solid var(--warn);':
+            'background:rgba(0,230,118,0.1);color:var(--success);border:1px solid var(--success);'}">${c.diff.toUpperCase()}</span>
+        ${isCustom ? '<span style="font-size:0.6rem;font-family:\'IBM Plex Mono\',monospace;padding:2px 7px;margin-left:6px;background:rgba(232,255,0,0.08);color:var(--accent);border:1px solid var(--accent);">CUSTOM</span>' : ''}
+      </div>
+      ${isCustom ? `<button class="goal-delete" onclick="deleteCustomChallenge('${c.id}')">✕</button>` : '<span style="color:var(--border);font-size:0.7rem;">SYS</span>'}
+    </div>`;
+  }).join('');
+}
+
+function addCustomChallenge() {
+  const name = document.getElementById('customChallengeName').value.trim();
+  const icon = document.getElementById('customChallengeIcon').value.trim() || '⚡';
+  const desc = document.getElementById('customChallengeDesc').value.trim();
+  const diff = document.getElementById('customChallengeDiff').value;
+  const cat  = document.getElementById('customChallengeCat').value;
+  if (!name) { toast('Name eingeben!'); return; }
+  if (!state.customChallenges) state.customChallenges = [];
+  state.customChallenges.push({ id: 'cc' + Date.now(), icon, name, desc: desc || name, diff, cat });
+  save();
+  document.getElementById('customChallengeName').value = '';
+  document.getElementById('customChallengeIcon').value = '';
+  document.getElementById('customChallengeDesc').value = '';
+  renderChallengeLibrary();
+  toast('✓ Challenge hinzugefügt!');
+}
+
+function deleteCustomChallenge(id) {
+  state.customChallenges = (state.customChallenges || []).filter(c => c.id !== id);
+  save();
+  renderChallengeLibrary();
+  toast('Challenge gelöscht.');
+}
+
+// ==============================
+// DATA EXPORT / IMPORT
+// ==============================
+function updateExportInfo() {
+  const el = document.getElementById('exportInfo');
+  if (!el) return;
+  const days = Object.keys(state).filter(k => /^\d{4}-\d{2}-\d{2}$/.test(k)).length;
+  const workouts = (state.workouts || []).length;
+  const notes = (state.notes || []).length;
+  const bytes = JSON.stringify(state).length;
+  el.innerHTML = `TAGE GETRACKT: ${days}<br>WORKOUTS: ${workouts}<br>NOTIZEN: ${notes}<br>DATEIGRÖSSE: ~${Math.round(bytes/1024*10)/10} KB`;
+}
+
+function exportData() {
+  const dataStr = JSON.stringify(state, null, 2);
+  const blob = new Blob([dataStr], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const d = new Date().toISOString().split('T')[0];
+  a.download = `dimitri-dashboard-backup-${d}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('✓ Export abgeschlossen!');
+}
+
+function importData() {
+  const file = document.getElementById('importFile').files[0];
+  if (!file) { toast('Keine Datei ausgewählt!'); return; }
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const imported = JSON.parse(e.target.result);
+      if (typeof imported !== 'object') throw new Error();
+      if (!confirm('ACHTUNG: Alle aktuellen Daten werden überschrieben. Fortfahren?')) return;
+      state = imported;
+      localStorage.setItem(KEY, JSON.stringify(state));
+      toast('✓ Import erfolgreich! Seite wird neu geladen...');
+      setTimeout(() => location.reload(), 1500);
+    } catch {
+      toast('Fehler: Ungültige Backup-Datei.');
+    }
+  };
+  reader.readAsText(file);
+}
+
+function confirmReset() {
+  if (!confirm('ALLE DATEN LÖSCHEN? Das kann nicht rückgängig gemacht werden.')) return;
+  if (!confirm('Bist du sicher? Letzter Check.')) return;
+  localStorage.removeItem(KEY);
+  toast('Daten gelöscht. Seite wird neu geladen...');
+  setTimeout(() => location.reload(), 1500);
 }
 
 init();
